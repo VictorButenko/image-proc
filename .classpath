@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Java"/>
+	<classpathentry kind="lib" path="C:/Users/CEO/Dropbox/Work/Java/libraries/javacv-0.4-bin/javacv-bin/javacpp.jar"/>
+	<classpathentry kind="lib" path="C:/Users/CEO/Dropbox/Work/Java/libraries/javacv-0.4-bin/javacv-bin/javacv.jar"/>
+	<classpathentry kind="lib" path="C:/Users/CEO/Dropbox/Work/Java/libraries/javacv-0.4-bin/javacv-bin/javacv-windows-x86.jar"/>
+	<classpathentry kind="lib" path="C:/Users/CEO/Dropbox/Work/Java/libraries/opencv-2.4.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/opencv-2.4.4">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/JavaAll/OpenCV/opencv/build/java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
