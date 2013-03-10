@@ -1,0 +1,9 @@
+*.class
+VbutDiplom.iml
+.project
+org.eclipse.jdt.core.prefs
+
+# Package Files #
+*.jar
+*.war
+*.ear
