@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 
 
 /**
@@ -25,7 +26,9 @@ public class ImageProcessing {
 	private CvMat image; 	      // Изображение для обработки, экземпляр класса JavaCV
 	private CvMat original;	      // Оригинал изображения (загруженного)
 	private CanvasFrame canvas;   // Фрэйм для отображения изображения, экземпляр класса JavaCV
-	private static final int N = 3; //Размер маски. TODO: No Hardcode!!!
+
+	//TODO: delete hardcode !!
+	private static final int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
 
 	//Конструктор  ( Инициализация) 
 	public ImageProcessing() {
@@ -59,6 +62,7 @@ public class ImageProcessing {
 	    System.out.println("Введите 'do' для построение RGB-кластера из картинки;");
 		System.out.println("ВВедите 'f' чтобы перевернуть изображение;");
 		System.out.println("Введите 'o' чтобы восстановить начальное изображение ");
+		System.out.println("Введите 'lol' чтобы выделить целевую область");
 
 		while (true) {	// Бесконечный цикл
 			// Отобразить изображение 
@@ -74,6 +78,9 @@ public class ImageProcessing {
 			}
 			else if (op.equals("do")) {
 				doMatrix();
+			}
+			else if (op.equals("lol")) {
+				allocatePart(x1, y1, x2, y2);
 			}
 			else if (op.equals("o")) {
 				// Восстановить оригинал
@@ -92,7 +99,31 @@ public class ImageProcessing {
 		}
 	}
 
-	
+	/**
+	 * 1) Берем кусок дороги
+     * 2) Считаем для него по всем точкам RBGср. 
+	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
+	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
+	 *    то перекрашиваем пиксель в красный цвет
+	 */
+
+	/**
+	 * Метод выделяет красным цветом область на изображении,
+	 * ограниченную параметрами.
+	 */
+	private void allocatePart(int x1, int y1, int x2, int y2) {
+		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
+		for (int i = 0; i < image.rows(); i ++) {
+			for ( int j = 0; j < image.cols(); j ++ ) {
+				// Выбираем целевые пиксели. 
+				if((i >= x1) && (i <= x2))
+					if ((j >= y1) && (j <= y2)) 
+						image.put(j, i, 2, 255); // Note! Координаты черед-ся (y,x). FIXME:
+				}
+			}
+	}
+
+
 	/**
 	 * Простов вывод матричного представления изображения в файл.
 	 * Сохраняем вывод в файл. Формат следующий ( y,x,c) - 

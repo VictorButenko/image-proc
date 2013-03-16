@@ -7,3 +7,8 @@ pixel to the file. (Reading an image from the file, building an matrix of coordi
 
 Next step: Create an mask(filter) of forest (e.g.) and do sliding.
 
+----------------16.03.2013-------------
+-find the average values for square (R, G, B). 
+- Work out with (x,y) or (y, x). There may  be some problems.
+- Calculate an error (range for R, G, B) cluster. 
+- Change all colors in the range on the picture to Rav, Gav, Bav.
