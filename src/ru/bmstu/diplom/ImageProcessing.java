@@ -16,8 +16,9 @@ import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 
 /**
  * Песочница. 
- * Базовый класс для загрузки, отображения и обработки изображения,
- * построенный на JavaCV
+ * Базовый класс для загрузки, отображения и обработки изображения, построенный на JavaCV
+ * 
+ * Погрешность принимаем равное 25 единицам (получено экспериментальным путем).TODO: check??
  * 
  * @author Butenko Victor, BMSTU, Spring 2013
  */
@@ -61,8 +62,10 @@ public class ImageProcessing {
 		System.out.println("Добро пожаловать в альфа-версию программы по обработке изображений.");
 	    System.out.println("Введите 'do' для построение RGB-кластера из картинки;");
 		System.out.println("ВВедите 'f' чтобы перевернуть изображение;");
+		System.out.println("Введите 's' чтобы сохранить изображение");
 		System.out.println("Введите 'o' чтобы восстановить начальное изображение ");
 		System.out.println("Введите 'lol' чтобы выделить целевую область");
+		System.out.println("Введите 'ro' чтобы вычислить среднее значение кластера RGB для дороги");
 
 		while (true) {	// Бесконечный цикл
 			// Отобразить изображение 
@@ -81,6 +84,9 @@ public class ImageProcessing {
 			}
 			else if (op.equals("lol")) {
 				allocatePart(x1, y1, x2, y2);
+			}
+			else if (op.equals("ro")) {
+				findRoad(x1, y1, x2, y2);
 			}
 			else if (op.equals("o")) {
 				// Восстановить оригинал
@@ -112,7 +118,7 @@ public class ImageProcessing {
 	 * ограниченную параметрами.
 	 */
 	private void allocatePart(int x1, int y1, int x2, int y2) {
-		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
+		// Цикл по всем строкам (i), столбцам (j)			
 		for (int i = 0; i < image.rows(); i ++) {
 			for ( int j = 0; j < image.cols(); j ++ ) {
 				// Выбираем целевые пиксели. 
@@ -121,6 +127,94 @@ public class ImageProcessing {
 						image.put(j, i, 2, 255); // Note! Координаты черед-ся (y,x). FIXME:
 				}
 			}
+	}
+	
+	/**
+	 * Метод выделяет красным цветом область на изображении,
+	 * ограниченную параметрами.
+	 */
+	private void findRoad(int x1, int y1, int x2, int y2) {
+
+		int blueAvrg  = 0;
+		int greenAvrg = 0;
+		int redAvrg   = 0;
+		int currColorBlue = 0, currColorGreen = 0, currColorRed = 0;
+		
+		int countPixels = (x2 - x1) * (y2 - y1); //Кол-во пикселей в данной области
+		System.out.println("pixels: " + countPixels);
+		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
+		for (int i = 0; i < image.rows(); i ++) {
+			for ( int j = 0; j < image.cols(); j ++ ) {
+				// Выбираем целевые пиксели. 
+				if((i >= x1) && (i <= x2))
+					if ((j >= y1) && (j <= y2)) {
+						
+						// Вытаскиваем текущие значения пикселей в BGR
+						currColorBlue  = (int) image.get(j, i, 0);
+						currColorGreen = (int) image.get(j, i, 1);
+						currColorRed   = (int) image.get(j, i, 2);
+						
+						//Вычисляем средние значения
+						blueAvrg  += currColorBlue;
+						greenAvrg += currColorGreen;
+						redAvrg   += currColorRed;
+
+					}						
+				}
+			}
+		// Посчитать среднее значение каждой компоненты RGB 
+		if (countPixels != 0) {
+			blueAvrg  = blueAvrg / countPixels ;
+			greenAvrg = greenAvrg / countPixels;
+			redAvrg   = redAvrg   / countPixels;
+		} else {
+			System.err.println("Error! An empty area !!!");
+		}
+		System.out.println("blue average : " + blueAvrg + 
+			   "; green average : " + greenAvrg  + "; Red Average :  " + redAvrg);
+		
+		// Разрисовка пикселей. 
+		paintRoad(blueAvrg, greenAvrg, redAvrg);
+	}
+	
+
+	private void paintRoad(int blueAvrg, int greenAvrg, int redAvrg) {
+		int error = 25;
+		int blueMin, blueMax;
+		int greenMin, greenMax;
+		int redMin, redMax;
+		int blueColor, greenColor, redColor;
+				
+		//К усредненым значениям добавляем погрешность error
+		blueMin = blueAvrg - error;
+		blueMax = blueAvrg + error;
+		greenMin = greenAvrg - error;
+		greenMax = greenAvrg + error;
+		redMin = redAvrg - error;
+		redMax = redAvrg + error;
+		
+		// Создать новое изображение, в которое будут вставлены результирующие пиксели
+		CvMat result = CvMat.create(image.rows(), image.cols(), image.type());
+		// Цикл по всем строкам (i), столбцам (j), и цветам (c) 
+        for (int i = 0; i < image.rows(); i++) {
+        	for (int j = 0; j < image.cols(); j++) {
+        		blueColor = (int) image.get(i, j, 0);
+        		greenColor = (int) image.get(i, j, 1);
+        		redColor =   (int) image.get(i, j , 2);
+        		
+        		if ( ((blueColor < blueMax ) && (blueColor > blueMin)) &&
+        				(greenColor < greenMax) && (greenColor > greenMin)  &&
+        				(redColor < redMax) && (redColor > redMin) ) {
+        			result.put(i, j, 0, blueAvrg);
+            		result.put(i, j, 1, greenAvrg);
+            		result.put(i, j, 2, redAvrg);
+        		}
+        		
+        		
+        	}
+				}
+				// Make the current image be this new imagе
+				image = result;
 	}
 
 
