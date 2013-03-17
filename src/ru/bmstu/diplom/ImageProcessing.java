@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
-import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 
 
 /**
@@ -24,21 +23,33 @@ import com.googlecode.javacv.cpp.opencv_core.CvScalar;
  */
 public class ImageProcessing {
 	
+	//----------------------------------CHANGING START------------------------------------
+	//TODO: delete hardcode !!
+	private static final int error  = 25;
+
+	private static final String theImage = "imgs/img1.jpg";
+	private static final int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
+	
+//	private static final String theImage = "imgs/forest.jpg";
+//	private static final int x1 = 328, y1 = 594, x2 = 734, y2 = 795; //Для forest.jpg !!!!
+	
+	//private static final String theImage = "imgs/river.jpg";
+    //private static final int x1 = 158, y1 = 223, x2 = 175, y2 = 268; //Для river !!!!
+	
+//    private static final String theImage = "imgs/river2.jpg";
+//    private static final int x1 = 374, y1 = 214, x2 = 405, y2 = 286; //Для river2 !!!!
+	
+	//----------------------------------CHANGING END------------------------------------
+	
 	private CvMat image; 	      // Изображение для обработки, экземпляр класса JavaCV
 	private CvMat original;	      // Оригинал изображения (загруженного)
 	private CanvasFrame canvas;   // Фрэйм для отображения изображения, экземпляр класса JavaCV
 
-	//TODO: delete hardcode !!
-	private static final int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
-	private static final int error  = 25;
-	
 	
 	//Конструктор  ( Инициализация) 
 	public ImageProcessing() {
-		
 		// Чтение изображение, прямое получение матрицы пикселей :TODO (загрузку изображений!!)
-		image = cvLoadImageM("imgs/img1.jpg");
-
+		image = cvLoadImageM(theImage);
 		// Убеждаемся, что изображения были успешно загружены
 		if (image == null) {
 			System.out.println("original image not found!");
@@ -47,14 +58,13 @@ public class ImageProcessing {
 		
 		// Сохраняем копию оригинала.
 		original = image.clone();
-				
 		// Создать JavaCV-ое окно с изображением (1 указывает на отсутствие коррекции гаммы)
 		canvas = new CanvasFrame("Image", 1);
-
 		// Запрос на закрытие приложения во время закрытия окна с изображением
 		canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 	}
 	
+
 	
 	/**
 	 * Главный цикл. Получение ввода от пользователя и соответствующая обработка 
@@ -88,7 +98,7 @@ public class ImageProcessing {
 				allocatePart(x1, y1, x2, y2);
 			}
 			else if (op.equals("ro")) {
-				findRoad(x1, y1, x2, y2);
+				findArea(x1, y1, x2, y2);
 			}
 			else if (op.equals("o")) {
 				// Восстановить оригинал
@@ -99,7 +109,7 @@ public class ImageProcessing {
 			}
 			else if (op.equals("s")) {
 				//Сохранить текущее изображение в папке
-				cvSaveImage("imgs/snapshot.jpg", image.asIplImage());
+				cvSaveImage(theImage + "_snap.jpg", image.asIplImage());
 			}
 			else {
 				System.out.println("Unknown operation");
@@ -107,13 +117,8 @@ public class ImageProcessing {
 		}
 	}
 
-	/**
-	 * 1) Берем кусок дороги
-     * 2) Считаем для него по всем точкам RBGср. 
-	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
-	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
-	 *    то перекрашиваем пиксель в красный цвет
-	 */
+	
+	
 
 	/**
 	 * Метод выделяет красным цветом область на изображении,
@@ -134,8 +139,14 @@ public class ImageProcessing {
 	/**
 	 * Метод выделяет красным цветом область на изображении,
 	 * ограниченную параметрами.
+	 * 
+	 * 1) Берем кусок дороги
+     * 2) Считаем для него по всем точкам RBGср. 
+	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
+	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
+	 *    то перекрашиваем пиксель в красный цвет
 	 */
-	private void findRoad(int x1, int y1, int x2, int y2) {
+	private void findArea(int x1, int y1, int x2, int y2) {
 
 		int blueAvrg  = 0;
 		int greenAvrg = 0;
@@ -176,7 +187,7 @@ public class ImageProcessing {
 			   "; green average : " + greenAvrg  + "; Red Average :  " + redAvrg);
 		
 		// Разрисовка пикселей. 
-		paintRoad(blueAvrg, greenAvrg, redAvrg);
+		paintArea(blueAvrg, greenAvrg, redAvrg);
 	}
 	
 	/**
@@ -189,7 +200,7 @@ public class ImageProcessing {
 	 * @param greenAvrg
 	 * @param redAvrg
 	 */
-	private void paintRoad(int blueAvrg, int greenAvrg, int redAvrg) {
+	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
 
 		int blueColor, greenColor, redColor;
 				
