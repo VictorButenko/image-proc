@@ -30,7 +30,9 @@ public class ImageProcessing {
 
 	//TODO: delete hardcode !!
 	private static final int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
-
+	private static final int error  = 25;
+	
+	
 	//Конструктор  ( Инициализация) 
 	public ImageProcessing() {
 		
@@ -139,26 +141,26 @@ public class ImageProcessing {
 		int greenAvrg = 0;
 		int redAvrg   = 0;
 		int currColorBlue = 0, currColorGreen = 0, currColorRed = 0;
-		
 		int countPixels = (x2 - x1) * (y2 - y1); //Кол-во пикселей в данной области
 		System.out.println("pixels: " + countPixels);
+		
 		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
 		for (int i = 0; i < image.rows(); i ++) {
 			for ( int j = 0; j < image.cols(); j ++ ) {
+				
 				// Выбираем целевые пиксели. 
 				if((i >= x1) && (i <= x2))
-					if ((j >= y1) && (j <= y2)) {
-						
-						// Вытаскиваем текущие значения пикселей в BGR
+					if ((j >= y1) && (j <= y2)) {		
+						// Вытаскиваем текущие значения пикселей в RGB
 						currColorBlue  = (int) image.get(j, i, 0);
 						currColorGreen = (int) image.get(j, i, 1);
 						currColorRed   = (int) image.get(j, i, 2);
 						
-						//Вычисляем средние значения
+						//Накапливаем сумму значений цветовых компонент 
+						//для вычисления среднего значения
 						blueAvrg  += currColorBlue;
 						greenAvrg += currColorGreen;
 						redAvrg   += currColorRed;
-
 					}						
 				}
 			}
@@ -177,45 +179,45 @@ public class ImageProcessing {
 		paintRoad(blueAvrg, greenAvrg, redAvrg);
 	}
 	
-
+	/**
+	 * Вспомогательный метод. Производит попиксельный проход по изображению, 
+	 * проверяя цвет пикселя на принадлежность к усредненному диапазону значений 
+	 * для каждой цветовой компоненты. В случае успеха приравнивает компоненту 
+	 * Red этого пикселя к 255. (Разукрашивает дорогу в красный цвет)
+	 * 
+	 * @param blueAvrg
+	 * @param greenAvrg
+	 * @param redAvrg
+	 */
 	private void paintRoad(int blueAvrg, int greenAvrg, int redAvrg) {
-		int error = 25;
-		int blueMin, blueMax;
-		int greenMin, greenMax;
-		int redMin, redMax;
+
 		int blueColor, greenColor, redColor;
 				
 		//К усредненым значениям добавляем погрешность error
-		blueMin = blueAvrg - error;
-		blueMax = blueAvrg + error;
-		greenMin = greenAvrg - error;
-		greenMax = greenAvrg + error;
-		redMin = redAvrg - error;
-		redMax = redAvrg + error;
+		int blueMin = blueAvrg - error;
+		int blueMax = blueAvrg + error;
+		int greenMin = greenAvrg - error;
+		int greenMax = greenAvrg + error;
+		int redMin = redAvrg - error;
+		int redMax = redAvrg + error;
 		
-		// Создать новое изображение, в которое будут вставлены результирующие пиксели
-		CvMat result = CvMat.create(image.rows(), image.cols(), image.type());
-		// Цикл по всем строкам (i), столбцам (j), и цветам (c) 
+		// Цикл по всем строкам (i), столбцам (j) 
         for (int i = 0; i < image.rows(); i++) {
         	for (int j = 0; j < image.cols(); j++) {
+        		//Элементы проходим в порядке (y,x). (Не влияет на результат)
         		blueColor = (int) image.get(i, j, 0);
         		greenColor = (int) image.get(i, j, 1);
         		redColor =   (int) image.get(i, j , 2);
         		
-        		if ( ((blueColor < blueMax ) && (blueColor > blueMin)) &&
-        				(greenColor < greenMax) && (greenColor > greenMin)  &&
-        				(redColor < redMax) && (redColor > redMin) ) {
-        			result.put(i, j, 0, blueAvrg);
-            		result.put(i, j, 1, greenAvrg);
-            		result.put(i, j, 2, redAvrg);
+        		// Если цвет пикселя попадает в диапазон значений с погрешностью 
+        		if ( (blueColor < blueMax )  && (blueColor > blueMin)    &&
+        			 (greenColor < greenMax) && (greenColor > greenMin)  &&
+        			 (redColor < redMax)     && (redColor > redMin) ) {
+        				image.put(i, j, 2, 255);  //Покрасить дорогу в красный цвет.
+        				}
         		}
-        		
-        		
         	}
-				}
-				// Make the current image be this new imagе
-				image = result;
-	}
+        }
 
 
 	/**
