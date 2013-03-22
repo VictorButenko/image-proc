@@ -24,103 +24,14 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
  */
 public  class ImageProcessing {
 	
-	//----------------------------------CHANGING START------------------------------------
-	//TODO: delete hardcode !!
 	private static final int error  = 25;
-
-	private static final String theImage = "imgs/img1.jpg";
-	private static final int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
-	
-//	private static final String theImage = "imgs/forest.jpg";
-//	private static final int x1 = 328, y1 = 594, x2 = 734, y2 = 795; //Для forest.jpg !!!!
-	
-	//private static final String theImage = "imgs/river.jpg";
-    //private static final int x1 = 158, y1 = 223, x2 = 175, y2 = 268; //Для river !!!!
-	
-//    private static final String theImage = "imgs/river2.jpg";
-//    private static final int x1 = 374, y1 = 214, x2 = 405, y2 = 286; //Для river2 !!!!
-	
-	//----------------------------------CHANGING END------------------------------------
-	
-	private CvMat image; 	      // Изображение для обработки, экземпляр класса JavaCV
-	private CvMat original;	      // Оригинал изображения (загруженного)
-	private CanvasFrame canvas;   // Фрэйм для отображения изображения, экземпляр класса JavaCV
+	private CvMat image;  // Изображение для обработки, экземпляр класса JavaCV
 
 	
 	//Конструктор  ( Инициализация) 
 	public ImageProcessing(IplImage thisImage) {
-		
 		image = thisImage.asCvMat();
-		// Чтение изображение, прямое получение матрицы пикселей :TODO (загрузку изображений!!)
-//		image = cvLoadImageM(theImage);
-//		// Убеждаемся, что изображения были успешно загружены
-//		if (image == null) {
-//			System.out.println("original image not found!");
-//			System.exit(1);
-//		}
-		
-		// Сохраняем копию оригинала.
-		original = image.clone();
-		// Создать JavaCV-ое окно с изображением (1 указывает на отсутствие коррекции гаммы)
-//		canvas = new CanvasFrame("Image", 1);
-//		// Запрос на закрытие приложения во время закрытия окна с изображением
-//		canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 	}
-	
-
-	
-	/**
-	 * Главный цикл. Получение ввода от пользователя и соответствующая обработка 
-	 */
-	public void run() {
-		Scanner in = new Scanner(System.in);
-		System.out.println("Добро пожаловать в альфа-версию программы по обработке изображений.");
-	    System.out.println("Введите 'do' для построение RGB-кластера из картинки;");
-		System.out.println("ВВедите 'f' чтобы перевернуть изображение;");
-		System.out.println("Введите 's' чтобы сохранить изображение");
-		System.out.println("Введите 'o' чтобы восстановить начальное изображение ");
-		System.out.println("Введите 'lol' чтобы выделить целевую область");
-		System.out.println("Введите 'ro' чтобы вычислить среднее значение кластера RGB для дороги");
-
-		while (true) {	// Бесконечный цикл
-			// Отобразить изображение 
-			canvas.showImage(image.asIplImage());
-			
-			// Get operation and dispatch to function to process it.
-			// Получение команды и отправка её к фукнции обработки. 
-			System.out.println("Operation >");
-			String op = in.nextLine();
-			
-			if (op.isEmpty()) {
-				continue;
-			}
-			else if (op.equals("do")) {
-				doMatrix();
-			}
-			else if (op.equals("lol")) {
-				allocatePart(x1, y1, x2, y2);
-			}
-			else if (op.equals("ro")) {
-				findArea(x1, y1, x2, y2);
-			}
-			else if (op.equals("o")) {
-				// Восстановить оригинал
-				image = original.clone();
-			}
-			else if (op.equals("f")) {
-				flip();
-			}
-			else if (op.equals("s")) {
-				//Сохранить текущее изображение в папке
-				cvSaveImage(theImage + "_snap.jpg", image.asIplImage());
-			}
-			else {
-				System.out.println("Unknown operation");
-			}
-		}
-	}
-
-	
 	
 
 	/**
@@ -203,7 +114,7 @@ public  class ImageProcessing {
 	 * @param greenAvrg
 	 * @param redAvrg
 	 */
-	public void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
+	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
 
 		int blueColor, greenColor, redColor;
 				
@@ -275,32 +186,4 @@ public  class ImageProcessing {
 		System.setOut(System.out); 
 	}
 	
-	/**
-	 * Перевернуть изображение вверх ногами
-	 */
-	public void flip() {
-		// Создать новое изображение, в которое будут вставлены результирующие пиксели
-		CvMat result = CvMat.create(image.rows(), image.cols(), image.type());
-		// Цикл по всем строкам (i), столбцам (j), и цветам (c) 
-		for (int i = 0; i < image.rows(); i++) {
-			for (int j = 0; j < image.cols(); j++) {
-				for (int c = 0; c < 3; c++) {
-					int i2 = image.rows() - 1 - i; // Индекс последней строки =  (rows-1)
-					result.put(i2, j, c, image.get(i, j, c));
-				}
-			}
-		}
-		// Make the current image be this new imagе
-		image = result;
-	}
-	
-	/**
-	 * Создает экземпляр изображения и запускает обработку.
-	 * @param args	ignored
-	 */
-//	public static void main(String[] args) {
-//		ImageProcessing proc = new ImageProcessing();
-//		proc.run();
-//	}
-
 }
