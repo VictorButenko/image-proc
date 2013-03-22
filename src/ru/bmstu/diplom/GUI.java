@@ -23,8 +23,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
@@ -50,6 +55,15 @@ public final class GUI extends JFrame   {
     /**Переменная, содержащая загруженное изображение*/
     private IplImage image = null;
     private IplImage original = null;
+    
+    /** Area coordinates*/
+    private int x1, y1, x2, y2;
+    
+    /** Height and Weight of the image */
+    private int heightIm = 600, widthIm = 800;
+    
+    /** Spinners for allocating the area */
+    private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
     
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -171,6 +185,10 @@ public final class GUI extends JFrame   {
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                         allocateAction.setEnabled(true);
                         processAction.setEnabled(true);
+                        
+                        //Define the size of the image
+                        heightIm = image.height();
+                        widthIm  = image.width();
 
                     }
                 } finally {
@@ -192,7 +210,53 @@ public final class GUI extends JFrame   {
         buttonsPanel.add(new JButton(resetAction));
         buttonsPanel.add(new JButton(saveAction));
         
+        
+        
+        //Create Spinner panel FIXME: Избавиться от дублирования ??!
+        ChangeListener listenerX1 = new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+                JSpinner js = (JSpinner) e.getSource();
+                x1 = (Integer) js.getValue();
+            }
+        };
+        ChangeListener listenerY1 = new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+                JSpinner js = (JSpinner) e.getSource();
+                y1 = (Integer) js.getValue();
+            }
+        };
+        ChangeListener listenerX2 = new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+                JSpinner js = (JSpinner) e.getSource();
+                x2 = (Integer) js.getValue();
+            }
+        };
+        ChangeListener listenerY2 = new ChangeListener() {
+        	public void stateChanged(ChangeEvent e) {
+                JSpinner js = (JSpinner) e.getSource();
+                y2 = (Integer) js.getValue();
+            }
+        };
+        
+        
+    
+        // Объявление модели JSpinner'а
+        SpinnerModel modelX1 = new SpinnerNumberModel(206, 0, widthIm, 1);
+        SpinnerModel modelY1 = new SpinnerNumberModel(135, 0, heightIm, 1);
+        SpinnerModel modelX2 = new SpinnerNumberModel(258, 0, widthIm, 1);
+        SpinnerModel modelY2 = new SpinnerNumberModel(173, 0, heightIm, 1);
+        //Объявление JSpinner'а, которого будем слушать
+        spinnerX1 = new JSpinner(modelX1);
+        spinnerY1 = new JSpinner(modelY1);
+        spinnerX2 = new JSpinner(modelX2);
+        spinnerY2 = new JSpinner(modelY2);
+        
+        spinnerX1.addChangeListener(listenerX1);
+        spinnerY1.addChangeListener(listenerY1);
+        spinnerX2.addChangeListener(listenerX2);
+        spinnerY2.addChangeListener(listenerY2);
 
+       
         // Layout frame contents
 
         // Action buttons on the left
@@ -200,6 +264,15 @@ public final class GUI extends JFrame   {
         leftPane.add(buttonsPanel);
         add(leftPane, BorderLayout.WEST);
 
+      //Action spinners on the left
+        final JPanel spinnerPane = new JPanel();
+        spinnerPane.add(spinnerX1);
+        spinnerPane.add(spinnerY1);
+        spinnerPane.add(spinnerX2);
+        spinnerPane.add(spinnerY2);
+        add(spinnerPane, BorderLayout.BEFORE_FIRST_LINE);
+        
+        
         // Image display in the center
         final JScrollPane imageScrollPane = new JScrollPane(imageView);
         imageScrollPane.setPreferredSize(new Dimension(640, 480));
@@ -235,23 +308,29 @@ public final class GUI extends JFrame   {
 
     /**
      * Process image in place
-     *
+     * int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
+     * int x1 = 328, y1 = 594, x2 = 734, y2 = 795; //Для forest.jpg !!!!
+     * int x1 = 158, y1 = 223, x2 = 175, y2 = 268; //Для river !!!!
+     * int x1 = 374, y1 = 214, x2 = 405, y2 = 286; //Для river2 !!!!
+     * 
      * @param src image to process.
      */
     private void processImage(final IplImage src) {
        ImageProcessing imgProc = new ImageProcessing(src);
-       
-     int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
-    // int x1 = 328, y1 = 594, x2 = 734, y2 = 795; //Для forest.jpg !!!!
-    // int x1 = 158, y1 = 223, x2 = 175, y2 = 268; //Для river !!!!
-    // int x1 = 374, y1 = 214, x2 = 405, y2 = 286; //Для river2 !!!!
+       x1 = (Integer) spinnerX1.getValue();
+   	   y1 = (Integer) spinnerY1.getValue();
+   	   x2 = (Integer) spinnerX2.getValue();
+       y2 = (Integer) spinnerY2.getValue();
        imgProc.findArea(x1, y1, x2, y2);
         
     }
     /**Method for allocating the area */
     private void allocateImage (final IplImage src ) {
     	ImageProcessing imgProc = new ImageProcessing(src);
-    	int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
+    	x1 = (Integer) spinnerX1.getValue();
+    	y1 = (Integer) spinnerY1.getValue();
+    	x2 = (Integer) spinnerX2.getValue();
+    	y2 = (Integer) spinnerY2.getValue();
     	imgProc.allocatePart(x1, y1, x2, y2);
     }
 
