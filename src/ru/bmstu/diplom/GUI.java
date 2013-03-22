@@ -2,6 +2,7 @@ package ru.bmstu.diplom;
 
 import static com.googlecode.javacv.cpp.opencv_core.cvFlip;
 import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
+import static com.googlecode.javacv.cpp.opencv_highgui.cvSaveImage;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2RGB;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
@@ -22,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -62,6 +64,31 @@ public final class GUI extends JFrame {
         // Define actions
 
 
+        // Action perfomed when "Save" button is pressed
+        final Action saveAction = new AbstractAction("Save") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				try {
+					if (image != null) {
+						final String path = fileChooser.getSelectedFile().getAbsolutePath();
+						String newImgName = path + "_snap.jpg";
+						cvSaveImage(newImgName, image);
+						showMessageDialog(GUI.this, 
+								"Image " + newImgName + " was successully saved.", getTitle(), 
+								JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						showMessageDialog(GUI.this, "Image not opened",
+                        		getTitle(), ERROR_MESSAGE);
+					}
+				} finally {
+					setCursor(Cursor.getDefaultCursor());
+				}
+				
+			}
+		};
         
         //  Action performed when "Process" button is pressed
         final Action processAction = new AbstractAction("Process") {
@@ -76,7 +103,8 @@ public final class GUI extends JFrame {
                         processImage(image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                     } else {
-                        showMessageDialog(GUI.this, "Image not opened", getTitle(), ERROR_MESSAGE);
+                        showMessageDialog(GUI.this, "Image not opened",
+                        		getTitle(), ERROR_MESSAGE);
                     }
                 } finally {
                     setCursor(Cursor.getDefaultCursor());
@@ -119,7 +147,7 @@ public final class GUI extends JFrame {
         buttonsPanel.add(new JButton());//TODO
         buttonsPanel.add(new JButton(processAction));
         buttonsPanel.add(new JButton());//TODO
-        buttonsPanel.add(new JButton());//TODO
+        buttonsPanel.add(new JButton(saveAction));//TODO
         
 
         // Layout frame contents

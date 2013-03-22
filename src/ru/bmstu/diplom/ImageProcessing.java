@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 
 /**
@@ -21,7 +22,7 @@ import com.googlecode.javacv.cpp.opencv_core.CvMat;
  * 
  * @author Butenko Victor, BMSTU, Spring 2013
  */
-public class ImageProcessing {
+public  class ImageProcessing {
 	
 	//----------------------------------CHANGING START------------------------------------
 	//TODO: delete hardcode !!
@@ -47,21 +48,23 @@ public class ImageProcessing {
 
 	
 	//Конструктор  ( Инициализация) 
-	public ImageProcessing() {
+	public ImageProcessing(IplImage thisImage) {
+		
+		image = thisImage.asCvMat();
 		// Чтение изображение, прямое получение матрицы пикселей :TODO (загрузку изображений!!)
-		image = cvLoadImageM(theImage);
-		// Убеждаемся, что изображения были успешно загружены
-		if (image == null) {
-			System.out.println("original image not found!");
-			System.exit(1);
-		}
+//		image = cvLoadImageM(theImage);
+//		// Убеждаемся, что изображения были успешно загружены
+//		if (image == null) {
+//			System.out.println("original image not found!");
+//			System.exit(1);
+//		}
 		
 		// Сохраняем копию оригинала.
 		original = image.clone();
 		// Создать JavaCV-ое окно с изображением (1 указывает на отсутствие коррекции гаммы)
-		canvas = new CanvasFrame("Image", 1);
-		// Запрос на закрытие приложения во время закрытия окна с изображением
-		canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+//		canvas = new CanvasFrame("Image", 1);
+//		// Запрос на закрытие приложения во время закрытия окна с изображением
+//		canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 	}
 	
 
@@ -124,7 +127,7 @@ public class ImageProcessing {
 	 * Метод выделяет красным цветом область на изображении,
 	 * ограниченную параметрами.
 	 */
-	private void allocatePart(int x1, int y1, int x2, int y2) {
+	public void allocatePart(int x1, int y1, int x2, int y2) {
 		// Цикл по всем строкам (i), столбцам (j)			
 		for (int i = 0; i < image.rows(); i ++) {
 			for ( int j = 0; j < image.cols(); j ++ ) {
@@ -146,7 +149,7 @@ public class ImageProcessing {
 	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
 	 *    то перекрашиваем пиксель в красный цвет
 	 */
-	private void findArea(int x1, int y1, int x2, int y2) {
+	public void findArea(int x1, int y1, int x2, int y2) {
 
 		int blueAvrg  = 0;
 		int greenAvrg = 0;
@@ -200,7 +203,7 @@ public class ImageProcessing {
 	 * @param greenAvrg
 	 * @param redAvrg
 	 */
-	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
+	public void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
 
 		int blueColor, greenColor, redColor;
 				
@@ -246,7 +249,7 @@ public class ImageProcessing {
 	 * поток стандартного ввода (System.out) в текстовый файл.
 	 *  
 	 */
-	private void doMatrix() {
+	public void doMatrix() {
 		
 		 //Создать текстовый файл для вывода
 		 //Перенаправить вывод из консоли в файл.
@@ -275,7 +278,7 @@ public class ImageProcessing {
 	/**
 	 * Перевернуть изображение вверх ногами
 	 */
-	private void flip() {
+	public void flip() {
 		// Создать новое изображение, в которое будут вставлены результирующие пиксели
 		CvMat result = CvMat.create(image.rows(), image.cols(), image.type());
 		// Цикл по всем строкам (i), столбцам (j), и цветам (c) 
@@ -295,9 +298,9 @@ public class ImageProcessing {
 	 * Создает экземпляр изображения и запускает обработку.
 	 * @param args	ignored
 	 */
-	public static void main(String[] args) {
-		ImageProcessing proc = new ImageProcessing();
-		proc.run();
-	}
+//	public static void main(String[] args) {
+//		ImageProcessing proc = new ImageProcessing();
+//		proc.run();
+//	}
 
 }
