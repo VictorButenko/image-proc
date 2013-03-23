@@ -58,12 +58,16 @@ public final class GUI extends JFrame   {
     
     /** Area coordinates*/
     private int x1, y1, x2, y2;
+    /** The error of the RGB average*/
+    private int error;
     
     /** Height and Weight of the image */
     private int heightIm = 600, widthIm = 800;
     
     /** Spinners for allocating the area */
     private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
+    /** Spinner for error choosing*/
+    private JSpinner errorSpinner; 
     
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -237,7 +241,13 @@ public final class GUI extends JFrame   {
                 y2 = (Integer) js.getValue();
             }
         };
-        
+        ChangeListener listenerError = new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner js = (JSpinner) e.getSource();
+				error = (Integer) js.getValue();
+			}
+		};
         
     
         // Объявление модели JSpinner'а
@@ -245,17 +255,25 @@ public final class GUI extends JFrame   {
         SpinnerModel modelY1 = new SpinnerNumberModel(135, 0, heightIm, 1);
         SpinnerModel modelX2 = new SpinnerNumberModel(258, 0, widthIm, 1);
         SpinnerModel modelY2 = new SpinnerNumberModel(173, 0, heightIm, 1);
+        SpinnerModel modError= new SpinnerNumberModel(25, 0, 255, 1);
         //Объявление JSpinner'а, которого будем слушать
-        spinnerX1 = new JSpinner(modelX1);
-        spinnerY1 = new JSpinner(modelY1);
-        spinnerX2 = new JSpinner(modelX2);
-        spinnerY2 = new JSpinner(modelY2);
+        spinnerX1    = new JSpinner(modelX1);
+        spinnerY1    = new JSpinner(modelY1);
+        spinnerX2    = new JSpinner(modelX2);
+        spinnerY2    = new JSpinner(modelY2);
+        errorSpinner = new JSpinner(modError);
         
         spinnerX1.addChangeListener(listenerX1);
         spinnerY1.addChangeListener(listenerY1);
         spinnerX2.addChangeListener(listenerX2);
         spinnerY2.addChangeListener(listenerY2);
-
+        errorSpinner.addChangeListener(listenerError);
+        
+        JLabel x1Label = new JLabel("x1");
+        JLabel y1Label = new JLabel("y1");
+        JLabel x2Label = new JLabel("x2");
+        JLabel y2Label = new JLabel("y2");
+        JLabel erLabel = new JLabel("error");
        
         // Layout frame contents
 
@@ -266,10 +284,16 @@ public final class GUI extends JFrame   {
 
       //Action spinners on the left
         final JPanel spinnerPane = new JPanel();
+        spinnerPane.add(x1Label);
         spinnerPane.add(spinnerX1);
+        spinnerPane.add(y1Label);
         spinnerPane.add(spinnerY1);
+        spinnerPane.add(x2Label);
         spinnerPane.add(spinnerX2);
+        spinnerPane.add(y2Label);
         spinnerPane.add(spinnerY2);
+        spinnerPane.add(erLabel);
+        spinnerPane.add(errorSpinner);
         add(spinnerPane, BorderLayout.BEFORE_FIRST_LINE);
         
         
@@ -321,7 +345,7 @@ public final class GUI extends JFrame   {
    	   y1 = (Integer) spinnerY1.getValue();
    	   x2 = (Integer) spinnerX2.getValue();
        y2 = (Integer) spinnerY2.getValue();
-       imgProc.findArea(x1, y1, x2, y2);
+       imgProc.findArea(x1, y1, x2, y2, error);
         
     }
     /**Method for allocating the area */
