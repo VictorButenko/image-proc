@@ -24,7 +24,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
  */
 public  class ImageProcessing {
 	
-	private static final int error  = 25;
+	//private static final int error  = 25;
 	private CvMat image;  // Изображение для обработки, экземпляр класса JavaCV
 
 	
@@ -60,7 +60,7 @@ public  class ImageProcessing {
 	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
 	 *    то перекрашиваем пиксель в красный цвет
 	 */
-	public void findArea(int x1, int y1, int x2, int y2) {
+	public void findArea(int x1, int y1, int x2, int y2, int error) {
 
 		int blueAvrg  = 0;
 		int greenAvrg = 0;
@@ -101,7 +101,7 @@ public  class ImageProcessing {
 			   "; green average : " + greenAvrg  + "; Red Average :  " + redAvrg);
 		
 		// Разрисовка пикселей. 
-		paintArea(blueAvrg, greenAvrg, redAvrg);
+		paintArea(blueAvrg, greenAvrg, redAvrg, error);
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public  class ImageProcessing {
 	 * @param greenAvrg
 	 * @param redAvrg
 	 */
-	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg) {
+	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg, int error) {
 
 		int blueColor, greenColor, redColor;
 				
