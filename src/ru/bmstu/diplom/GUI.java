@@ -345,6 +345,7 @@ public final class GUI extends JFrame   {
    	   y1 = (Integer) spinnerY1.getValue();
    	   x2 = (Integer) spinnerX2.getValue();
        y2 = (Integer) spinnerY2.getValue();
+       error = (Integer) errorSpinner.getValue();
        imgProc.findArea(x1, y1, x2, y2, error);
         
     }
