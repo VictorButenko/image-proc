@@ -67,8 +67,9 @@ public final class GUI extends JFrame   {
     /** Spinners for allocating the area */
     private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
     /** Spinner for error choosing*/
+
     private JSpinner spinnerError; 
-    
+
   //----------------------------ПОЛЯ---------------------------------------------
 	
     
@@ -259,11 +260,14 @@ public final class GUI extends JFrame   {
         SpinnerModel modError= new SpinnerNumberModel(25, 0, 255, 1);
         
         //Создание объектов JSpinner'
+
         spinnerX1    = new JSpinner(modelX1);
         spinnerY1    = new JSpinner(modelY1);
         spinnerX2    = new JSpinner(modelX2);
         spinnerY2    = new JSpinner(modelY2);
+
         spinnerError = new JSpinner(modError);
+
         
         // Добавляем слушателей к элементам jSpinner
         spinnerX1.addChangeListener(listenerX1);
@@ -271,7 +275,7 @@ public final class GUI extends JFrame   {
         spinnerX2.addChangeListener(listenerX2);
         spinnerY2.addChangeListener(listenerY2);
         spinnerError.addChangeListener(listenerError);
-        
+
         JLabel x1Label = new JLabel("x1");
         JLabel y1Label = new JLabel("y1");
         JLabel x2Label = new JLabel("x2");
@@ -297,6 +301,7 @@ public final class GUI extends JFrame   {
         spinnerPane.add(spinnerY2);
         spinnerPane.add(erLabel);
         spinnerPane.add(spinnerError);
+
         add(spinnerPane, BorderLayout.BEFORE_FIRST_LINE);
         
         
@@ -348,7 +353,9 @@ public final class GUI extends JFrame   {
    	   y1 = (Integer) spinnerY1.getValue();
    	   x2 = (Integer) spinnerX2.getValue();
        y2 = (Integer) spinnerY2.getValue();
+
        error = (Integer) spinnerError.getValue();
+
        imgProc.findArea(x1, y1, x2, y2, error);
         
     }
