@@ -67,7 +67,7 @@ public final class GUI extends JFrame   {
     /** Spinners for allocating the area */
     private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
     /** Spinner for error choosing*/
-    private JSpinner errorSpinner; 
+    private JSpinner spinnerError; 
     
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -89,7 +89,7 @@ public final class GUI extends JFrame   {
 						image = original.clone();
 						imageView.setIcon(new ImageIcon(image.getBufferedImage()));
 					} else {
-						showMessageDialog(GUI.this, "Image not opened",
+						showMessageDialog(GUI.this, "Image is not opened",
                         		getTitle(), ERROR_MESSAGE);
 					}
 				} finally {
@@ -115,7 +115,7 @@ public final class GUI extends JFrame   {
 								"Image " + newImgName + " was successully saved.", getTitle(), 
 								INFORMATION_MESSAGE);
 					} else {
-						showMessageDialog(GUI.this, "Image not opened",
+						showMessageDialog(GUI.this, "Image is not opened",
                         		getTitle(), ERROR_MESSAGE);
 					}
 				} finally {
@@ -187,13 +187,14 @@ public final class GUI extends JFrame   {
                         image = img;
                         original = image.clone();
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
+                        
+                        // Buttons 'Process' and 'Allocate' are available after opening
                         allocateAction.setEnabled(true);
                         processAction.setEnabled(true);
                         
                         //Define the size of the image
                         heightIm = image.height();
                         widthIm  = image.width();
-
                     }
                 } finally {
                     setCursor(Cursor.getDefaultCursor());
@@ -216,7 +217,7 @@ public final class GUI extends JFrame   {
         
         
         
-        //Create Spinner panel FIXME: Избавиться от дублирования ??!
+        //Create Spinner's listeners for every of coordinates and error
         ChangeListener listenerX1 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
                 JSpinner js = (JSpinner) e.getSource();
@@ -250,24 +251,26 @@ public final class GUI extends JFrame   {
 		};
         
     
-        // Объявление модели JSpinner'а
+        // Создание модели JSpinner'а
         SpinnerModel modelX1 = new SpinnerNumberModel(206, 0, widthIm, 1);
         SpinnerModel modelY1 = new SpinnerNumberModel(135, 0, heightIm, 1);
         SpinnerModel modelX2 = new SpinnerNumberModel(258, 0, widthIm, 1);
         SpinnerModel modelY2 = new SpinnerNumberModel(173, 0, heightIm, 1);
         SpinnerModel modError= new SpinnerNumberModel(25, 0, 255, 1);
-        //Объявление JSpinner'а, которого будем слушать
+        
+        //Создание объектов JSpinner'
         spinnerX1    = new JSpinner(modelX1);
         spinnerY1    = new JSpinner(modelY1);
         spinnerX2    = new JSpinner(modelX2);
         spinnerY2    = new JSpinner(modelY2);
-        errorSpinner = new JSpinner(modError);
+        spinnerError = new JSpinner(modError);
         
+        // Добавляем слушателей к элементам jSpinner
         spinnerX1.addChangeListener(listenerX1);
         spinnerY1.addChangeListener(listenerY1);
         spinnerX2.addChangeListener(listenerX2);
         spinnerY2.addChangeListener(listenerY2);
-        errorSpinner.addChangeListener(listenerError);
+        spinnerError.addChangeListener(listenerError);
         
         JLabel x1Label = new JLabel("x1");
         JLabel y1Label = new JLabel("y1");
@@ -293,7 +296,7 @@ public final class GUI extends JFrame   {
         spinnerPane.add(y2Label);
         spinnerPane.add(spinnerY2);
         spinnerPane.add(erLabel);
-        spinnerPane.add(errorSpinner);
+        spinnerPane.add(spinnerError);
         add(spinnerPane, BorderLayout.BEFORE_FIRST_LINE);
         
         
@@ -345,7 +348,7 @@ public final class GUI extends JFrame   {
    	   y1 = (Integer) spinnerY1.getValue();
    	   x2 = (Integer) spinnerX2.getValue();
        y2 = (Integer) spinnerY2.getValue();
-       error = (Integer) errorSpinner.getValue();
+       error = (Integer) spinnerError.getValue();
        imgProc.findArea(x1, y1, x2, y2, error);
         
     }
