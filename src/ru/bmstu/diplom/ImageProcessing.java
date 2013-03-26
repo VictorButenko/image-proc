@@ -20,7 +20,6 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
  */
 public  class ImageProcessing {
 	
-	//private static final int error  = 25;
 	private CvMat image;  // Изображение для обработки, экземпляр класса JavaCV
 
 	

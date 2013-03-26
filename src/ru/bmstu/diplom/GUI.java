@@ -61,14 +61,17 @@ public final class GUI extends JFrame   {
     /** The error of the RGB average*/
     private int error;
     
-    /** Height and Weight of the image */
-    private int heightIm = 600, widthIm = 800;
+    /** Width Height of the image */
+    private int  widthIm = 1920, heightIm = 1600; 
     
     /** Spinners for allocating the area */
     private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
     /** Spinner for error choosing*/
 
     private JSpinner spinnerError; 
+    
+    private SpinnerNumberModel modelX1, modelY1, modelX2, modelY2;
+    private SpinnerModel modError; 
 
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -139,7 +142,7 @@ public final class GUI extends JFrame   {
                         allocateImage(image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                     } else {
-                        showMessageDialog(GUI.this, "Image not opened",
+                        showMessageDialog(GUI.this, "Image is not opened",
                         		getTitle(), ERROR_MESSAGE);
                     }
                 } finally {
@@ -163,7 +166,7 @@ public final class GUI extends JFrame   {
                         processImage(image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                     } else {
-                        showMessageDialog(GUI.this, "Image not opened",
+                        showMessageDialog(GUI.this, "Image is not opened",
                         		getTitle(), ERROR_MESSAGE);
                     }
                 } finally {
@@ -194,8 +197,11 @@ public final class GUI extends JFrame   {
                         processAction.setEnabled(true);
                         
                         //Define the size of the image
-                        heightIm = image.height();
-                        widthIm  = image.width();
+                        modelX1.setMaximum(image.width());
+                        modelY1.setMaximum(image.height());
+                        modelX2.setMaximum(image.width());
+                        modelY2.setMaximum(image.height());
+                        
                     }
                 } finally {
                     setCursor(Cursor.getDefaultCursor());
@@ -265,11 +271,12 @@ public final class GUI extends JFrame   {
 		 * int x1_0 = 158, y1_0 = 223, x2_0 = 175, y2_0 = 268; //Для river !!!!
 		 * int x1_0 = 374, y1_0 = 214, x2_0 = 405, y2_0 = 286; //Для river2 !!!!
 		 */
-        SpinnerModel modelX1 = new SpinnerNumberModel(x1_0,  0, widthIm,  1); // (default, min, max, step)
-        SpinnerModel modelY1 = new SpinnerNumberModel(y1_0,  0, heightIm, 1);
-        SpinnerModel modelX2 = new SpinnerNumberModel(x2_0,  0, widthIm,  1);
-        SpinnerModel modelY2 = new SpinnerNumberModel(y2_0,  0, heightIm, 1);
-        SpinnerModel modError= new SpinnerNumberModel(err_0, 0, err_max,  1); 
+		 
+         modelX1 = new SpinnerNumberModel(x1_0,  1, widthIm,  1); // (default, min, max, step)
+         modelY1 = new SpinnerNumberModel(y1_0,  1, heightIm, 1);
+         modelX2 = new SpinnerNumberModel(x2_0,  1, widthIm,  1);
+         modelY2 = new SpinnerNumberModel(y2_0,  1, heightIm, 1);
+         modError= new SpinnerNumberModel(err_0, 0, err_max,  1); 
         
         //Создание объектов JSpinner'
         spinnerX1    = new JSpinner(modelX1);
