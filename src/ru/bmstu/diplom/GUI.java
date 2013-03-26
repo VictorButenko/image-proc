@@ -62,16 +62,17 @@ public final class GUI extends JFrame   {
     private int error;
     
     /** Width Height of the image */
-    private int  widthIm = 1920, heightIm = 1600; 
+    private int  widthIm = 1280, heightIm = 1024; 
     
     /** Spinners for allocating the area */
     private JSpinner spinnerX1,  spinnerY1,  spinnerX2,  spinnerY2;
-    /** Spinner for error choosing*/
 
+    /** Spinner for error choosing*/
     private JSpinner spinnerError; 
-    
+	
+	/** Number models for spinner to create some restrictions (default, min, max, step) values*/    
     private SpinnerNumberModel modelX1, modelY1, modelX2, modelY2;
-    private SpinnerModel modError; 
+    private SpinnerModel modError; // Another one model for error
 
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -260,7 +261,7 @@ public final class GUI extends JFrame   {
     
 	
 		/** Начальные значения для аллоцируемой области*/
-		int x1_0 = 374, y1_0 = 214, x2_0 = 405, y2_0 = 286; //Для river2 !!!!
+		int x1_0 = 206, y1_0 = 135, x2_0 = 258, y2_0 = 173; //Для river2 !!!!
 		int err_0 = 25, err_max = 50; // error default = 25, max error range = 50. !!
 	
 		/**

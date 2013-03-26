@@ -11,10 +11,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 
 /**
- * Песочница. 
  * Базовый класс для загрузки, отображения и обработки изображения, построенный на JavaCV
- * 
- * Погрешность принимаем равное 25 единицам (получено экспериментальным путем).TODO: check??
  * 
  * @author Butenko Victor, BMSTU, Spring 2013
  */
