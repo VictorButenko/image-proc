@@ -252,20 +252,30 @@ public final class GUI extends JFrame   {
 		};
         
     
-        // Создание модели JSpinner'а
-        SpinnerModel modelX1 = new SpinnerNumberModel(206, 0, widthIm, 1);
-        SpinnerModel modelY1 = new SpinnerNumberModel(135, 0, heightIm, 1);
-        SpinnerModel modelX2 = new SpinnerNumberModel(258, 0, widthIm, 1);
-        SpinnerModel modelY2 = new SpinnerNumberModel(173, 0, heightIm, 1);
-        SpinnerModel modError= new SpinnerNumberModel(25, 0, 255, 1);
+	
+		/** Начальные значения для аллоцируемой области*/
+		int x1_0 = 374, y1_0 = 214, x2_0 = 405, y2_0 = 286; //Для river2 !!!!
+		int err_0 = 25, err_max = 50; // error default = 25, max error range = 50. !!
+	
+		/**
+		 * Создание моделей JSpinner'а
+		 * 
+		 * int x1_0 = 206, y1_0 = 135, x2_0 = 258, y2_0 = 173; //Для img1 !!!!
+		 * int x1_0 = 328, y1_0 = 594, x2_0 = 734, y2_0 = 795; //Для forest.jpg !!!!
+		 * int x1_0 = 158, y1_0 = 223, x2_0 = 175, y2_0 = 268; //Для river !!!!
+		 * int x1_0 = 374, y1_0 = 214, x2_0 = 405, y2_0 = 286; //Для river2 !!!!
+		 */
+        SpinnerModel modelX1 = new SpinnerNumberModel(x1_0,  0, widthIm,  1); // (default, min, max, step)
+        SpinnerModel modelY1 = new SpinnerNumberModel(y1_0,  0, heightIm, 1);
+        SpinnerModel modelX2 = new SpinnerNumberModel(x2_0,  0, widthIm,  1);
+        SpinnerModel modelY2 = new SpinnerNumberModel(y2_0,  0, heightIm, 1);
+        SpinnerModel modError= new SpinnerNumberModel(err_0, 0, err_max,  1); 
         
         //Создание объектов JSpinner'
-
         spinnerX1    = new JSpinner(modelX1);
         spinnerY1    = new JSpinner(modelY1);
         spinnerX2    = new JSpinner(modelX2);
         spinnerY2    = new JSpinner(modelY2);
-
         spinnerError = new JSpinner(modError);
 
         
@@ -328,6 +338,7 @@ public final class GUI extends JFrame   {
         // Load the image
         final String path = fileChooser.getSelectedFile().getAbsolutePath();
         final IplImage newImage = cvLoadImage(path);
+       
         if (newImage != null) {
             return newImage;
         } else {
@@ -340,25 +351,21 @@ public final class GUI extends JFrame   {
 
     /**
      * Process image in place
-     * int x1 = 206, y1 = 135, x2 = 258, y2 = 173; //Для img1 !!!!
-     * int x1 = 328, y1 = 594, x2 = 734, y2 = 795; //Для forest.jpg !!!!
-     * int x1 = 158, y1 = 223, x2 = 175, y2 = 268; //Для river !!!!
-     * int x1 = 374, y1 = 214, x2 = 405, y2 = 286; //Для river2 !!!!
      * 
      * @param src image to process.
      */
     private void processImage(final IplImage src) {
        ImageProcessing imgProc = new ImageProcessing(src);
-       x1 = (Integer) spinnerX1.getValue();
-   	   y1 = (Integer) spinnerY1.getValue();
-   	   x2 = (Integer) spinnerX2.getValue();
-       y2 = (Integer) spinnerY2.getValue();
 
+       x1    = (Integer) spinnerX1.getValue();
+   	   y1    = (Integer) spinnerY1.getValue();
+   	   x2    = (Integer) spinnerX2.getValue();
+       y2    = (Integer) spinnerY2.getValue();
        error = (Integer) spinnerError.getValue();
 
        imgProc.findArea(x1, y1, x2, y2, error);
-        
     }
+
     /**Method for allocating the area */
     private void allocateImage (final IplImage src ) {
     	ImageProcessing imgProc = new ImageProcessing(src);

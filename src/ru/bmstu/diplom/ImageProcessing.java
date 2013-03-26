@@ -1,15 +1,11 @@
 package ru.bmstu.diplom;
 
-import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImageM;
-import static com.googlecode.javacv.cpp.opencv_highgui.cvSaveImage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Scanner;
 
-import com.googlecode.javacv.CanvasFrame;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
@@ -67,7 +63,7 @@ public  class ImageProcessing {
 		int redAvrg   = 0;
 		int currColorBlue = 0, currColorGreen = 0, currColorRed = 0;
 		int countPixels = (x2 - x1) * (y2 - y1); //Кол-во пикселей в данной области
-		System.out.println("pixels: " + countPixels);
+		System.out.println("pixels: " + (x2-x1) + " * " + (y2-y1) + " = " + countPixels);
 		
 		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
 		for (int i = 0; i < image.rows(); i ++) {
