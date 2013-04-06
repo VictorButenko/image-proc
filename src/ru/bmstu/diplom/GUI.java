@@ -12,12 +12,14 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -73,6 +75,11 @@ public final class GUI extends JFrame   {
 	/** Number models for spinner to create some restrictions (default, min, max, step) values*/    
     private SpinnerNumberModel modelX1, modelY1, modelX2, modelY2;
     private SpinnerModel modError; // Another one model for error
+    
+    private final String[] areas = {
+            "Road",
+            "Forest",
+            "River" };
 
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -215,15 +222,34 @@ public final class GUI extends JFrame   {
         // Create UI
         //
 
+        //--------------------COMBOBOX PART -----------------------------------------------
+        //Create the ComboBox for choosing the type of the area
+        JComboBox typeBox = new JComboBox(areas);
+        typeBox.setEditable(false); 
+        typeBox.setAlignmentX(CENTER_ALIGNMENT);
+        
+        //Create a ComboBox Listener
+        ActionListener boxListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JComboBox box = (JComboBox) e.getSource();
+				String area = (String) box.getSelectedItem();
+				
+			}
+		};
+		typeBox.addActionListener(boxListener);
+
+		//--------------------COMBOBOX PART -----------------------------------------------
         // Create button panel
         final JPanel buttonsPanel = new JPanel(new GridLayout(0, 1, 0, 5));
         buttonsPanel.add(new JButton(openImageAction));
+        buttonsPanel.add(typeBox);
         buttonsPanel.add(new JButton(allocateAction));
         buttonsPanel.add(new JButton(processAction));
         buttonsPanel.add(new JButton(resetAction));
         buttonsPanel.add(new JButton(saveAction));
         
-        
+       
         
         //Create Spinner's listeners for every of coordinates and error
         ChangeListener listenerX1 = new ChangeListener() {
