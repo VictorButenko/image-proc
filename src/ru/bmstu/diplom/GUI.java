@@ -134,7 +134,10 @@ public final class GUI extends JFrame   {
 				try { 
 					if (image != null) {
 						spinnersInit(typeBox.getSelectedIndex()); //Init array[][] from spinners
-						
+						showMessageDialog(GUI.this, 
+								"Coordinates of the " + typeBox.getSelectedItem() +" were fixed!", 
+								getTitle(), 
+								INFORMATION_MESSAGE);
 					} else {
 						showMessageDialog(GUI.this, "Image is not opened",
                         		getTitle(), ERROR_MESSAGE);
