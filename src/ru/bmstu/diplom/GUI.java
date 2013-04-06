@@ -64,7 +64,6 @@ public final class GUI extends JFrame   {
     private int error;
     
     
-    
     private int[] roadCoordinates   = { 206, 135, 258, 173 }; // The array for img 1. 
     private int[] forestCoordinates = { 328, 594, 734, 795 }; // The array for forest.jpg
     private int[] riverCoordinates  = { 374, 214, 405, 286 }; // for river.jpg
@@ -75,8 +74,9 @@ public final class GUI extends JFrame   {
 	**/
     private int[][] areaArrayCoordinates = {roadCoordinates, forestCoordinates, riverCoordinates}; 
     
+    private int[][] areaAverageColors    = new int[3][3];
     
-    		/** Width Height of the image */
+    /** Width Height of the image */
     private int  widthIm = 1280, heightIm = 1024; 
     
     /** Spinners for allocating the area */
@@ -133,7 +133,7 @@ public final class GUI extends JFrame   {
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				try { 
 					if (image != null) {
-						spinnersInit(typeBox.getSelectedIndex()); //Init array[][] from spinners
+						spinnersInit(typeBox.getSelectedIndex(), image); //Init array[][] from spinners
 						showMessageDialog(GUI.this, 
 								"Coordinates of the " + typeBox.getSelectedItem() +" were fixed!", 
 								getTitle(), 
@@ -209,7 +209,7 @@ public final class GUI extends JFrame   {
                 try {
                     // Обработать и обновить экран, если изображение загружено
                 	if (image != null) {
-                        processImage(image);
+                        processImage(typeBox.getSelectedIndex(), image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                     } else {
                         showMessageDialog(GUI.this, "Image is not opened",
@@ -445,10 +445,16 @@ public final class GUI extends JFrame   {
      * 
      * @param src image to process.
      */
-    private void processImage(final IplImage src) {
+    private void processImage(int type, final IplImage src) {
+    	
     	ImageProcessing imgProc = new ImageProcessing(src);
         error = (Integer) spinnerError.getValue();
-        imgProc.findArea(x1, y1, x2, y2, error);
+        int redAvrg   = areaAverageColors[type][0];
+        int greenAvrg = areaAverageColors[type][1];
+        int blueAvrg  = areaAverageColors[type][2];
+        
+        imgProc.paintByAvrgs(blueAvrg, greenAvrg, redAvrg, error);
+        //imgProc.findArea(x1, y1, x2, y2, error);
     }
 
 	/**Method for allocating the area */
@@ -459,12 +465,19 @@ public final class GUI extends JFrame   {
     }
     
   /**Additional Method to initialize the coordinates*/
-    
-    private void spinnersInit(int type) {
-    	 areaArrayCoordinates[type][0]  = (Integer) spinnerX1.getValue();
-    	 areaArrayCoordinates[type][1]  = (Integer) spinnerY1.getValue();
-    	 areaArrayCoordinates[type][2]  = (Integer) spinnerX2.getValue();
-    	 areaArrayCoordinates[type][3]  = (Integer) spinnerY2.getValue();
+    private void spinnersInit(int type, final IplImage src ) {
+    	 areaArrayCoordinates[type][0]  = (Integer) spinnerX1.getValue(); //x1
+    	 areaArrayCoordinates[type][1]  = (Integer) spinnerY1.getValue(); //y1
+    	 areaArrayCoordinates[type][2]  = (Integer) spinnerX2.getValue(); //x2
+    	 areaArrayCoordinates[type][3]  = (Integer) spinnerY2.getValue(); //y2
+    	 
+    	 x1 = areaArrayCoordinates[type][0];
+    	 y1 = areaArrayCoordinates[type][1];
+    	 x2 = areaArrayCoordinates[type][2];
+    	 y2 = areaArrayCoordinates[type][3];
+    	
+    	 ImageProcessing imgProc = new ImageProcessing(src);
+    	 areaAverageColors[type] = imgProc.averageColors(x1, y1, x2, y2);
 	}
 
 

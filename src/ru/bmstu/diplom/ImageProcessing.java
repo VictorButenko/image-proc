@@ -42,18 +42,12 @@ public  class ImageProcessing {
 			}
 	}
 	
+	
 	/**
-	 * Метод выделяет красным цветом область на изображении,
-	 * ограниченную параметрами.
-	 * 
-	 * 1) Берем кусок дороги
-     * 2) Считаем для него по всем точкам RBGср. 
-	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
-	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
-	 *    то перекрашиваем пиксель в красный цвет
+	 * Find average values of colors of the area 
 	 */
-	public void findArea(int x1, int y1, int x2, int y2, int error) {
-
+	public int[] averageColors(int x1, int y1, int x2, int y2) {
+		
 		int blueAvrg  = 0;
 		int greenAvrg = 0;
 		int redAvrg   = 0;
@@ -92,8 +86,29 @@ public  class ImageProcessing {
 		System.out.println("blue average : " + blueAvrg + 
 			   "; green average : " + greenAvrg  + "; Red Average :  " + redAvrg);
 		
+		int[] avrgValues = { redAvrg, greenAvrg, blueAvrg };
+		
+		return avrgValues;
+	}
+	
+	/**
+	 * Метод выделяет красным цветом область на изображении,
+	 * ограниченную параметрами.
+	 * 
+	 * 1) Берем кусок дороги
+     * 2) Считаем для него по всем точкам RBGср. 
+	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
+	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
+	 *    то перекрашиваем пиксель в красный цвет
+	 */
+	public void findArea(int x1, int y1, int x2, int y2, int error) {
+
+		int[] avrgValues = averageColors(x1, y1, x2, y2);
+		int redAvrg   = avrgValues[0];
+		int greenAvrg = avrgValues[1];
+		int blueAvrg  = avrgValues[2];
 		// Разрисовка пикселей. 
-		paintArea(blueAvrg, greenAvrg, redAvrg, error);
+		paintByAvrgs(blueAvrg, greenAvrg, redAvrg, error);
 	}
 	
 	/**
@@ -106,7 +121,7 @@ public  class ImageProcessing {
 	 * @param greenAvrg
 	 * @param redAvrg
 	 */
-	private void paintArea(int blueAvrg, int greenAvrg, int redAvrg, int error) {
+	public void paintByAvrgs(int blueAvrg, int greenAvrg, int redAvrg, int error) {
 
 		int blueColor, greenColor, redColor;
 				
