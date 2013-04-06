@@ -63,7 +63,20 @@ public final class GUI extends JFrame   {
     /** The error of the RGB average*/
     private int error;
     
-    /** Width Height of the image */
+    
+    
+    private int[] roadCoordinates   = { 206, 135, 258, 173 }; // The array for img 1. 
+    private int[] forestCoordinates = { 328, 594, 734, 795 }; // The array for forest.jpg
+    private int[] riverCoordinates  = { 374, 214, 405, 286 }; // for river.jpg
+    /** the matrix of coordinates:  
+     * ROAD:   |x1, y1, x2, y2|
+	 * FOREST: |x1, y1, x2, y2|
+	 * RIVER:  |x1, y1, x2, y2|
+	**/
+    private int[][] areaArrayCoordinates = {roadCoordinates, forestCoordinates, riverCoordinates}; 
+    
+    
+    		/** Width Height of the image */
     private int  widthIm = 1280, heightIm = 1024; 
     
     /** Spinners for allocating the area */
@@ -80,6 +93,7 @@ public final class GUI extends JFrame   {
             "Road",
             "Forest",
             "River" };
+    private JComboBox typeBox = new JComboBox(areas);
 
   //----------------------------ПОЛЯ---------------------------------------------
 	
@@ -110,6 +124,27 @@ public final class GUI extends JFrame   {
 			}
 		};
 		
+		//Action perfomed when "Fix" button is pressed
+		final Action fixAction  = new AbstractAction("Fix") {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				try { 
+					if (image != null) {
+						spinnersInit(typeBox.getSelectedIndex()); //Init array[][] from spinners
+						
+					} else {
+						showMessageDialog(GUI.this, "Image is not opened",
+                        		getTitle(), ERROR_MESSAGE);
+					}
+				} finally {
+					setCursor(Cursor.getDefaultCursor());
+				}
+			}
+		};
+		fixAction.setEnabled(false);
 		
         // Action perfomed when "Save" button is pressed
         final Action saveAction = new AbstractAction("Save") {
@@ -137,7 +172,7 @@ public final class GUI extends JFrame   {
 			}
 		};
         
-		 //  Action performed when "Process" button is pressed
+		 //  Action performed when "Allocate" button is pressed
         final Action allocateAction = new AbstractAction("Allocate") {
             private static final long serialVersionUID = 1L;
 
@@ -203,6 +238,7 @@ public final class GUI extends JFrame   {
                         // Buttons 'Process' and 'Allocate' are available after opening
                         allocateAction.setEnabled(true);
                         processAction.setEnabled(true);
+                        fixAction.setEnabled(true);
                         
                         //Define the size of the image
                         modelX1.setMaximum(image.width());
@@ -224,7 +260,6 @@ public final class GUI extends JFrame   {
 
         //--------------------COMBOBOX PART -----------------------------------------------
         //Create the ComboBox for choosing the type of the area
-        JComboBox typeBox = new JComboBox(areas);
         typeBox.setEditable(false); 
         typeBox.setAlignmentX(CENTER_ALIGNMENT);
         
@@ -234,7 +269,29 @@ public final class GUI extends JFrame   {
 			public void actionPerformed(ActionEvent e) {
 				JComboBox box = (JComboBox) e.getSource();
 				String area = (String) box.getSelectedItem();
+				selectForProcessing(area);
 				
+			}
+
+			/**
+			 * Set x1, y1, x2, y2 depends on the chosed area
+			 * @param area
+			 */
+			private void selectForProcessing(String area) {
+				if(area.equals("Road")) {
+					setParamsXY(0);
+				} else if (area.equals("Forest")) {
+					setParamsXY(1);
+				} else if (area.equals("River")) {
+					setParamsXY(2);
+				} 
+			}
+			
+			private void setParamsXY(int type) {
+				x1 = areaArrayCoordinates[type][0];
+				y1 = areaArrayCoordinates[type][1];
+				x2 = areaArrayCoordinates[type][2];
+				y2 = areaArrayCoordinates[type][3];
 			}
 		};
 		typeBox.addActionListener(boxListener);
@@ -244,6 +301,7 @@ public final class GUI extends JFrame   {
         final JPanel buttonsPanel = new JPanel(new GridLayout(0, 1, 0, 5));
         buttonsPanel.add(new JButton(openImageAction));
         buttonsPanel.add(typeBox);
+        buttonsPanel.add(new JButton(fixAction));
         buttonsPanel.add(new JButton(allocateAction));
         buttonsPanel.add(new JButton(processAction));
         buttonsPanel.add(new JButton(resetAction));
@@ -254,26 +312,22 @@ public final class GUI extends JFrame   {
         //Create Spinner's listeners for every of coordinates and error
         ChangeListener listenerX1 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
-                JSpinner js = (JSpinner) e.getSource();
-                x1 = (Integer) js.getValue();
+                x1 = areaArrayCoordinates[typeBox.getSelectedIndex()][0];
             }
         };
         ChangeListener listenerY1 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
-                JSpinner js = (JSpinner) e.getSource();
-                y1 = (Integer) js.getValue();
+                y1 = areaArrayCoordinates[typeBox.getSelectedIndex()][1];
             }
         };
         ChangeListener listenerX2 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
-                JSpinner js = (JSpinner) e.getSource();
-                x2 = (Integer) js.getValue();
+                x2 = areaArrayCoordinates[typeBox.getSelectedIndex()][2];
             }
         };
         ChangeListener listenerY2 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
-                JSpinner js = (JSpinner) e.getSource();
-                y2 = (Integer) js.getValue();
+                y2 = areaArrayCoordinates[typeBox.getSelectedIndex()][3];
             }
         };
         ChangeListener listenerError = new ChangeListener() {
@@ -389,26 +443,26 @@ public final class GUI extends JFrame   {
      * @param src image to process.
      */
     private void processImage(final IplImage src) {
-       ImageProcessing imgProc = new ImageProcessing(src);
-
-       x1    = (Integer) spinnerX1.getValue();
-   	   y1    = (Integer) spinnerY1.getValue();
-   	   x2    = (Integer) spinnerX2.getValue();
-       y2    = (Integer) spinnerY2.getValue();
-       error = (Integer) spinnerError.getValue();
-
-       imgProc.findArea(x1, y1, x2, y2, error);
+    	ImageProcessing imgProc = new ImageProcessing(src);
+        error = (Integer) spinnerError.getValue();
+        imgProc.findArea(x1, y1, x2, y2, error);
     }
 
-    /**Method for allocating the area */
+	/**Method for allocating the area */
     private void allocateImage (final IplImage src ) {
     	ImageProcessing imgProc = new ImageProcessing(src);
-    	x1 = (Integer) spinnerX1.getValue();
-    	y1 = (Integer) spinnerY1.getValue();
-    	x2 = (Integer) spinnerX2.getValue();
-    	y2 = (Integer) spinnerY2.getValue();
     	imgProc.allocatePart(x1, y1, x2, y2);
+    	
     }
+    
+  /**Additional Method to initialize the coordinates*/
+    
+    private void spinnersInit(int type) {
+    	 areaArrayCoordinates[type][0]  = (Integer) spinnerX1.getValue();
+    	 areaArrayCoordinates[type][1]  = (Integer) spinnerY1.getValue();
+    	 areaArrayCoordinates[type][2]  = (Integer) spinnerX2.getValue();
+    	 areaArrayCoordinates[type][3]  = (Integer) spinnerY2.getValue();
+	}
 
 
     public static void main(final String[] args) {
