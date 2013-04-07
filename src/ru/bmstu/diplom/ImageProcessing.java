@@ -11,33 +11,36 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 
 /**
- * Базовый класс для загрузки, отображения и обработки изображения, построенный на JavaCV
+ * Class for image processing. It's used by 'GUI.class'
  * 
  * @author Butenko Victor, BMSTU, Spring 2013
+ * @see GUI.java
  */
 public  class ImageProcessing {
 	
-	private CvMat image;  // Изображение для обработки, экземпляр класса JavaCV
-
+	/**Image for processing, an instance of JavaCV class */
+	private CvMat image;  
 	
-	//Конструктор  ( Инициализация) 
+	/** Constructor (initialization) */
 	public ImageProcessing(IplImage thisImage) {
 		image = thisImage.asCvMat();
 	}
 	
 
 	/**
-	 * Метод выделяет красным цветом область на изображении,
-	 * ограниченную параметрами.
+	 * The method allocate the area 
+	 * (which is bounded by parameters) with Red color. 
+	 * Every pixel in the area is processing pixel by pixel. 
+	 * 
+	 * FIXME: Refactor. Not process all image, only the area. 
 	 */
 	public void allocatePart(int x1, int y1, int x2, int y2) {
-		// Цикл по всем строкам (i), столбцам (j)			
 		for (int i = 0; i < image.rows(); i ++) {
 			for ( int j = 0; j < image.cols(); j ++ ) {
-				// Выбираем целевые пиксели. 
+				// If pixel enteres in the area, then paint it to red.
 				if((i >= x1) && (i <= x2))
 					if ((j >= y1) && (j <= y2)) 
-						image.put(j, i, 2, 255); // Note! Координаты черед-ся (y,x). FIXME:
+						image.put(j, i, 2, 255); // NOTE: [y,x], NOT [x,y] !!`
 				}
 			}
 	}
@@ -52,30 +55,28 @@ public  class ImageProcessing {
 		int greenAvrg = 0;
 		int redAvrg   = 0;
 		int currColorBlue = 0, currColorGreen = 0, currColorRed = 0;
-		int countPixels = (x2 - x1) * (y2 - y1); //Кол-во пикселей в данной области
+		int countPixels = (x2 - x1) * (y2 - y1); // The count of the pixels in the area
+
 		System.out.println("pixels: " + (x2-x1) + " * " + (y2-y1) + " = " + countPixels);
 		
-		// Цикл по всем строкам (i), столбцам (j), и цветам (c)				
 		for (int i = 0; i < image.rows(); i ++) {
 			for ( int j = 0; j < image.cols(); j ++ ) {
-				
-				// Выбираем целевые пиксели. 
 				if((i >= x1) && (i <= x2))
 					if ((j >= y1) && (j <= y2)) {		
-						// Вытаскиваем текущие значения пикселей в RGB
+						//Pull the current color values from the pixel
 						currColorBlue  = (int) image.get(j, i, 0);
 						currColorGreen = (int) image.get(j, i, 1);
 						currColorRed   = (int) image.get(j, i, 2);
 						
-						//Накапливаем сумму значений цветовых компонент 
-						//для вычисления среднего значения
+						// Accumulate the sum of the color components
 						blueAvrg  += currColorBlue;
 						greenAvrg += currColorGreen;
 						redAvrg   += currColorRed;
 					}						
 				}
 			}
-		// Посчитать среднее значение каждой компоненты RGB 
+
+		// count up the averages values of every color component 
 		if (countPixels != 0) {
 			blueAvrg  = blueAvrg / countPixels ;
 			greenAvrg = greenAvrg / countPixels;
@@ -86,36 +87,29 @@ public  class ImageProcessing {
 		System.out.println("blue average : " + blueAvrg + 
 			   "; green average : " + greenAvrg  + "; Red Average :  " + redAvrg);
 		
+		//Return the array of the avrg. colors for processing
 		int[] avrgValues = { redAvrg, greenAvrg, blueAvrg };
-		
 		return avrgValues;
 	}
 	
 	/**
-	 * Метод выделяет красным цветом область на изображении,
-	 * ограниченную параметрами.
-	 * 
-	 * 1) Берем кусок дороги
-     * 2) Считаем для него по всем точкам RBGср. 
-	 * 3) Запоминаем крайние точки. По ним считается погрешность E. 
-	 * 4) Проводим попиксельный просмотр, и если R, G и B попадает в диапазон E, 
-	 *    то перекрашиваем пиксель в красный цвет
+	 * The Method find averages values and  paint every pixel to red, 
+	 * if this pixel is entered to the range of the color avrg. values
 	 */
+	@Deprecated
 	public void findArea(int x1, int y1, int x2, int y2, int error) {
 
 		int[] avrgValues = averageColors(x1, y1, x2, y2);
 		int redAvrg   = avrgValues[0];
 		int greenAvrg = avrgValues[1];
 		int blueAvrg  = avrgValues[2];
-		// Разрисовка пикселей. 
+		// Painting
 		paintByAvrgs(blueAvrg, greenAvrg, redAvrg, error);
 	}
 	
 	/**
-	 * Вспомогательный метод. Производит попиксельный проход по изображению, 
-	 * проверяя цвет пикселя на принадлежность к усредненному диапазону значений 
-	 * для каждой цветовой компоненты. В случае успеха приравнивает компоненту 
-	 * Red этого пикселя к 255. (Разукрашивает дорогу в красный цвет)
+	 * This method paint every pixel to red, 
+	 * if this pixel is entered to the range of the color avrg. values
 	 * 
 	 * @param blueAvrg
 	 * @param greenAvrg
@@ -125,7 +119,7 @@ public  class ImageProcessing {
 
 		int blueColor, greenColor, redColor;
 				
-		//К усредненым значениям добавляем погрешность error
+		//Add the error(estimate) to the average values
 		int blueMin = blueAvrg - error;
 		int blueMax = blueAvrg + error;
 		int greenMin = greenAvrg - error;
@@ -133,19 +127,17 @@ public  class ImageProcessing {
 		int redMin = redAvrg - error;
 		int redMax = redAvrg + error;
 		
-		// Цикл по всем строкам (i), столбцам (j) 
         for (int i = 0; i < image.rows(); i++) {
         	for (int j = 0; j < image.cols(); j++) {
-        		//Элементы проходим в порядке (y,x). (Не влияет на результат)
         		blueColor = (int) image.get(i, j, 0);
         		greenColor = (int) image.get(i, j, 1);
         		redColor =   (int) image.get(i, j , 2);
         		
-        		// Если цвет пикселя попадает в диапазон значений с погрешностью 
+        		// It the value of color for every component is entered into the range 
         		if ( (blueColor < blueMax )  && (blueColor > blueMin)    &&
         			 (greenColor < greenMax) && (greenColor > greenMin)  &&
         			 (redColor < redMax)     && (redColor > redMin) ) {
-        				image.put(i, j, 2, 255);  //Покрасить дорогу в красный цвет.
+        				image.put(i, j, 2, 255);  // paint the pixel into the RED
         				}
         		}
         	}
@@ -153,32 +145,31 @@ public  class ImageProcessing {
 
 
 	/**
-	 * Простов вывод матричного представления изображения в файл.
-	 * Сохраняем вывод в файл. Формат следующий ( y,x,c) - 
-	 * y, x - координаты, c - цвет (BGR  - Blue, Green, Red (0..255))
+	 * Print the matrix presentation of the image to the file 'out.txt'
+	 * The format of the output is:
+	 * (y,x,c) where 'y' and 'x' are coordinates, 
+	 * 'c' - is a color (BGR  - Blue, Green, Red (0..255)
 	 * |y11, y12, y13, .., y1N |
 	 * |y21, y22, y23, .., y2N |
 	 * |...................    |
 	 * |yN1, yN2, yN3, .., yNN |
-	 * где y(i,j) = [0..255][0..255][0..255] - BGR
+	 * where y(i,j) = [0..255][0..255][0..255] - BGR
 	 * 
-	 * Кроме того, вывод цифровых значений в этом методе
-	 * осуществляется в файл. Для этого перенаправляем 
-	 * поток стандартного ввода (System.out) в текстовый файл.
+	 * Beside, output of the digital values in this method
+	 * redirect the standard output (System.out) stream 
+	 * to the file 'out.txt'
 	 *  
 	 */
 	public void doMatrix() {
 		
-		 //Создать текстовый файл для вывода
-		 //Перенаправить вывод из консоли в файл.
-		 try {
+		try {
 			System.setOut(new PrintStream(new FileOutputStream(new File("out.txt"))));
 		} catch (FileNotFoundException e) {
 			System.err.println("Нужно создать файл out.txt!!!");
 			e.printStackTrace();
 		}
 
-		 //Обрабатываем изображение как матрицу
+		//Process an image as Matrix
 		for(int i = 0; i < image.rows(); i++) {
 			System.out.println("");
 			for ( int j = 0; j < image.cols(); j++) {
@@ -189,7 +180,7 @@ public  class ImageProcessing {
 				System.out.print("]");
 			}
 		}
-		//Перенаправить стандартный вывод назад в консоль.
+		//Redirect the output to standard stream back
 		System.setOut(System.out); 
 	}
 	
