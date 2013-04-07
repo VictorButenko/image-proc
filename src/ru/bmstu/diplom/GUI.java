@@ -457,10 +457,18 @@ public final class GUI extends JFrame   {
         //imgProc.findArea(x1, y1, x2, y2, error);
     }
 
-	/**Method for allocating the area */
+	/**Method for allocating the area 
+	 * 
+	 * FIXME: Should use x1,y1,x2,y2 instead of direct using spinners.
+	 * */
     private void allocateImage (final IplImage src ) {
     	ImageProcessing imgProc = new ImageProcessing(src);
-    	imgProc.allocatePart(x1, y1, x2, y2);
+    	imgProc.allocatePart(
+    			(Integer) spinnerX1.getValue(),
+    			(Integer) spinnerY1.getValue(),
+    			(Integer) spinnerX2.getValue(), 
+    			(Integer) spinnerY2.getValue()
+    			);
     	
     }
     
