@@ -11,6 +11,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -36,26 +37,25 @@ import javax.swing.event.ChangeListener;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 /**
- * Класс, реализующий GUI (пользовательский интерфейс) для работы с 
- * изображениями.
- * 
+ * The class implements GUI for operating with Images
  * @author Victor Butenko
  */
 public final class GUI extends JFrame   {
 	
-	//----------------------------ПОЛЯ---------------------------------------------
+	//----------------------------FIESDS---------------------------------------------
 	
-	/** Для корректной работы сериализации */
+	/** For serialization */
 	private static final long serialVersionUID = 1L;
 
-	/**Компонент для выбора файла изображения (Открытие из текущей директории проекта/imgs) */
+	/** Components for image choosing (Opening from the project directory './imgs' */
 	private final JFileChooser fileChooser = new JFileChooser(new File(".//imgs"));
 	
-	/** Компонент для отображения изображений*/
+	/** Component to display an image*/
     private final JLabel imageView = new JLabel();
 
-    /**Переменная, содержащая загруженное изображение*/
+    /**Variable with loaded image*/
     private IplImage image = null;
+    /**Variable for resetting the changed image to the original */
     private IplImage original = null;
     
     /** Area coordinates*/
@@ -63,18 +63,20 @@ public final class GUI extends JFrame   {
     /** The error of the RGB average*/
     private int error;
     
-    
-    private int[] roadCoordinates   = { 206, 135, 258, 173 }; // The array for img 1. 
-    private int[] forestCoordinates = { 328, 594, 734, 795 }; // The array for forest.jpg
-    private int[] riverCoordinates  = { 374, 214, 405, 286 }; // for river.jpg
     /** the matrix of coordinates:  
      * ROAD:   |x1, y1, x2, y2|
 	 * FOREST: |x1, y1, x2, y2|
 	 * RIVER:  |x1, y1, x2, y2|
 	**/
-    private int[][] areaArrayCoordinates = {roadCoordinates, forestCoordinates, riverCoordinates}; 
+    private int[][] areaArrayCoordinates = new int[3][4];; 
     
-    private int[][] areaAverageColors    = new int[3][3];
+    /**
+     * The matrix of the average colors values
+     * ROAD:   |R, G, B|
+	 * FOREST: |R, G, B|
+	 * RIVER:  |R, G, B|
+     */
+    private int[][] areaAverageColors = new int[3][3];
     
     /** Width Height of the image */
     private int  widthIm = 1280, heightIm = 1024; 
@@ -95,10 +97,10 @@ public final class GUI extends JFrame   {
             "River" };
     private JComboBox typeBox = new JComboBox(areas);
 
-  //----------------------------ПОЛЯ---------------------------------------------
+  //----------------------------FIELDS END---------------------------------------------
 	
     
-    // Конструктор
+    // -------------------------CONSTRUCTOR START -------------------------------------
     private GUI() throws HeadlessException {
         super("The application for image processing"); 
         
@@ -115,8 +117,7 @@ public final class GUI extends JFrame   {
 						image = original.clone();
 						imageView.setIcon(new ImageIcon(image.getBufferedImage()));
 					} else {
-						showMessageDialog(GUI.this, "Image is not opened",
-                        		getTitle(), ERROR_MESSAGE);
+						showMessageDialog(GUI.this, "Image is not opened",getTitle(), ERROR_MESSAGE);
 					}
 				} finally {
 					setCursor(Cursor.getDefaultCursor());
@@ -124,30 +125,7 @@ public final class GUI extends JFrame   {
 			}
 		};
 		
-		//Action perfomed when "Fix" button is pressed
-		final Action fixAction  = new AbstractAction("Fix") {
-			private static final long serialVersionUID = 1L;
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				try { 
-					if (image != null) {
-						spinnersInit(typeBox.getSelectedIndex(), image); //Init array[][] from spinners
-						showMessageDialog(GUI.this, 
-								"Coordinates of the " + typeBox.getSelectedItem() +" were fixed!", 
-								getTitle(), 
-								INFORMATION_MESSAGE);
-					} else {
-						showMessageDialog(GUI.this, "Image is not opened",
-                        		getTitle(), ERROR_MESSAGE);
-					}
-				} finally {
-					setCursor(Cursor.getDefaultCursor());
-				}
-			}
-		};
-		fixAction.setEnabled(false);
+		
 		
         // Action perfomed when "Save" button is pressed
         final Action saveAction = new AbstractAction("Save") {
@@ -175,7 +153,8 @@ public final class GUI extends JFrame   {
 			}
 		};
         
-		 //  Action performed when "Allocate" button is pressed
+		
+		//  Action performed when "Allocate" button is pressed
         final Action allocateAction = new AbstractAction("Allocate") {
             private static final long serialVersionUID = 1L;
 
@@ -183,7 +162,7 @@ public final class GUI extends JFrame   {
             public void actionPerformed(final ActionEvent e) {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 try {
-                    // Обработать и обновить экран, если изображение загружено
+                	// Handle and renew a screen if an image is loaded
                 	if (image != null) {
                         allocateImage(image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
@@ -207,7 +186,7 @@ public final class GUI extends JFrame   {
             public void actionPerformed(final ActionEvent e) {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 try {
-                    // Обработать и обновить экран, если изображение загружено
+                	// Handle and renew a screen if an image is loaded
                 	if (image != null) {
                         processImage(typeBox.getSelectedIndex(), image);
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
@@ -222,6 +201,37 @@ public final class GUI extends JFrame   {
         };
         processAction.setEnabled(false);
 
+      //Action perfomed when "Fix" button is pressed
+      		final Action fixAction  = new AbstractAction("Fix") {
+      			private static final long serialVersionUID = 1L;
+      			
+      			@Override
+      			public void actionPerformed(ActionEvent e) {
+      				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      				try { 
+      					if (image != null) {
+      						int spinIndex = typeBox.getSelectedIndex();
+      						
+      						spinnersInit(spinIndex, image); //Init array[][] from spinners
+      						countAverage(spinIndex, image); //Calculate averages values
+      						
+      						processAction.setEnabled(true); //Allow to use the button 'process'
+      						showMessageDialog(GUI.this, 
+      								"Coordinates of the " + typeBox.getSelectedItem() +" were fixed!", 
+      								getTitle(), 
+      								INFORMATION_MESSAGE);
+      					} else {
+      						showMessageDialog(GUI.this, "Image is not opened",
+                              		getTitle(), ERROR_MESSAGE);
+      					}
+      				} finally {
+      					setCursor(Cursor.getDefaultCursor());
+      				}
+      			}
+      		};
+      		fixAction.setEnabled(false);
+      		
+      		
         // Action performed when "Open Image" button is pressed
         final Action openImageAction = new AbstractAction("Open Image") {
             private static final long serialVersionUID = 1L;
@@ -238,9 +248,8 @@ public final class GUI extends JFrame   {
                         original = image.clone();
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
                         
-                        // Buttons 'Process' and 'Allocate' are available after opening
+                        // Buttons 'FIX' and 'Allocate' are available after opening
                         allocateAction.setEnabled(true);
-                        processAction.setEnabled(true);
                         fixAction.setEnabled(true);
                         
                         //Define the size of the image
@@ -255,7 +264,7 @@ public final class GUI extends JFrame   {
                 }
             }
         };
-
+        
 
         //
         // Create UI
@@ -278,6 +287,7 @@ public final class GUI extends JFrame   {
 
 			/**
 			 * Set x1, y1, x2, y2 depends on the chosed area
+			 * FIXME: params to setParams not hardcode recieve 
 			 * @param area
 			 */
 			private void selectForProcessing(String area) {
@@ -311,7 +321,6 @@ public final class GUI extends JFrame   {
         buttonsPanel.add(new JButton(saveAction));
         
        
-        
         //Create Spinner's listeners for every of coordinates and error
         ChangeListener listenerX1 = new ChangeListener() {
         	public void stateChanged(ChangeEvent e) {
@@ -341,28 +350,18 @@ public final class GUI extends JFrame   {
 			}
 		};
         
-    
 	
-		/** Начальные значения для аллоцируемой области*/
-		int x1_0 = 206, y1_0 = 135, x2_0 = 258, y2_0 = 173; //Для river2 !!!!
+		/** Default values for allocated area */
+		int x1_0 = 206, y1_0 = 135, x2_0 = 258, y2_0 = 173; //For img1.jpg !!!!
 		int err_0 = 25, err_max = 50; // error default = 25, max error range = 50. !!
 	
-		/**
-		 * Создание моделей JSpinner'а
-		 * 
-		 * int x1_0 = 206, y1_0 = 135, x2_0 = 258, y2_0 = 173; //Для img1 !!!!
-		 * int x1_0 = 328, y1_0 = 594, x2_0 = 734, y2_0 = 795; //Для forest.jpg !!!!
-		 * int x1_0 = 158, y1_0 = 223, x2_0 = 175, y2_0 = 268; //Для river !!!!
-		 * int x1_0 = 374, y1_0 = 214, x2_0 = 405, y2_0 = 286; //Для river2 !!!!
-		 */
-		 
          modelX1 = new SpinnerNumberModel(x1_0,  1, widthIm,  1); // (default, min, max, step)
          modelY1 = new SpinnerNumberModel(y1_0,  1, heightIm, 1);
          modelX2 = new SpinnerNumberModel(x2_0,  1, widthIm,  1);
          modelY2 = new SpinnerNumberModel(y2_0,  1, heightIm, 1);
          modError= new SpinnerNumberModel(err_0, 0, err_max,  1); 
         
-        //Создание объектов JSpinner'
+        //Creating JSpinnser objects
         spinnerX1    = new JSpinner(modelX1);
         spinnerY1    = new JSpinner(modelY1);
         spinnerX2    = new JSpinner(modelX2);
@@ -370,13 +369,14 @@ public final class GUI extends JFrame   {
         spinnerError = new JSpinner(modError);
 
         
-        // Добавляем слушателей к элементам jSpinner
+        //Adding listeners for JSpinners
         spinnerX1.addChangeListener(listenerX1);
         spinnerY1.addChangeListener(listenerY1);
         spinnerX2.addChangeListener(listenerX2);
         spinnerY2.addChangeListener(listenerY2);
         spinnerError.addChangeListener(listenerError);
-
+        
+        //Creating labels for JSpinners
         JLabel x1Label = new JLabel("x1");
         JLabel y1Label = new JLabel("y1");
         JLabel x2Label = new JLabel("x2");
@@ -404,15 +404,21 @@ public final class GUI extends JFrame   {
         spinnerPane.add(spinnerError);
 
         add(spinnerPane, BorderLayout.BEFORE_FIRST_LINE);
-        
-        
+      
+      //Define the size of the Screen
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = kit.getScreenSize();
+        int screenHeigth = screenSize.height;
+        int screenWidth  = screenSize.width;
         // Image display in the center
         final JScrollPane imageScrollPane = new JScrollPane(imageView);
-        imageScrollPane.setPreferredSize(new Dimension(640, 480));
+        imageScrollPane.setPreferredSize(new Dimension(screenWidth / 2 , screenHeigth / 2));
         add(imageScrollPane, BorderLayout.CENTER);
+        //Set width and heigth of the frame by platform
+        setLocationByPlatform(true);
     
     }
-	
+    // -------------------------CONSTRUCTOR END -------------------------------------
     
     /**
      * Ask user for location and open new image.
@@ -454,7 +460,6 @@ public final class GUI extends JFrame   {
         int blueAvrg  = areaAverageColors[type][2];
         
         imgProc.paintByAvrgs(blueAvrg, greenAvrg, redAvrg, error);
-        //imgProc.findArea(x1, y1, x2, y2, error);
     }
 
 	/**Method for allocating the area 
@@ -473,22 +478,27 @@ public final class GUI extends JFrame   {
     }
     
   /**Additional Method to initialize the coordinates*/
-    private void spinnersInit(int type, final IplImage src ) {
+    private void spinnersInit(int type, final IplImage src) {
     	 areaArrayCoordinates[type][0]  = (Integer) spinnerX1.getValue(); //x1
     	 areaArrayCoordinates[type][1]  = (Integer) spinnerY1.getValue(); //y1
     	 areaArrayCoordinates[type][2]  = (Integer) spinnerX2.getValue(); //x2
     	 areaArrayCoordinates[type][3]  = (Integer) spinnerY2.getValue(); //y2
     	 
-    	 x1 = areaArrayCoordinates[type][0];
-    	 y1 = areaArrayCoordinates[type][1];
-    	 x2 = areaArrayCoordinates[type][2];
-    	 y2 = areaArrayCoordinates[type][3];
-    	
-    	 ImageProcessing imgProc = new ImageProcessing(src);
-    	 areaAverageColors[type] = imgProc.averageColors(x1, y1, x2, y2);
 	}
 
-
+    /** Method work out the average RGB values and saves them in the matrix*/
+    private void countAverage(int type, final IplImage src) {
+     
+     x1 = areaArrayCoordinates[type][0];
+   	 y1 = areaArrayCoordinates[type][1];
+   	 x2 = areaArrayCoordinates[type][2];
+   	 y2 = areaArrayCoordinates[type][3];
+   	
+   	 ImageProcessing imgProc = new ImageProcessing(src);
+   	 areaAverageColors[type] = imgProc.averageColors(x1, y1, x2, y2);
+    }
+    
+    
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
