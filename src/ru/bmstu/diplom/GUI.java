@@ -15,6 +15,10 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -46,7 +50,7 @@ public final class GUI extends JFrame   {
 	
 	/** For serialization */
 	private static final long serialVersionUID = 1L;
-
+	
 	/** Components for image choosing (Opening from the project directory './imgs' */
 	private final JFileChooser fileChooser = new JFileChooser(new File(".//imgs"));
 	
@@ -91,6 +95,8 @@ public final class GUI extends JFrame   {
     private SpinnerNumberModel modelX1, modelY1, modelX2, modelY2;
     private SpinnerModel modError; // Another one model for error
     
+
+    
     private final String[] areas = {
             "Road",
             "Forest",
@@ -104,7 +110,8 @@ public final class GUI extends JFrame   {
     private GUI() throws HeadlessException {
         super("The application for image processing"); 
         
-    	
+       
+        
         //Action perfomed when "Reset" button is pressed 
         final Action resetAction = new AbstractAction("Reset") {			
 			private static final long serialVersionUID = 1L;
@@ -244,6 +251,11 @@ public final class GUI extends JFrame   {
                     final IplImage img = openImage();
 
                     if (img != null) {
+                    	
+                    	final String imgName = 
+								fileChooser.getSelectedFile().getName();
+                    	initConditions(imgName);
+                    	
                         image = img;
                         original = image.clone();
                         imageView.setIcon(new ImageIcon(image.getBufferedImage()));
@@ -263,6 +275,49 @@ public final class GUI extends JFrame   {
                     setCursor(Cursor.getDefaultCursor());
                 }
             }
+
+            //FIXME: too much hardcoding
+            //Hardcode method for init. conditions for some images by their names
+			private void initConditions(String imgName) {
+				
+				Properties theConfig = new Properties();
+				try {
+					theConfig.load(new FileInputStream ("coordinates.properties"));
+				} catch (IOException e) {
+					System.err.println("Couldn't load config file !!");
+				} 
+				String coordinates = new String();
+				System.out.println("imgName = " + imgName);
+				
+				if(imgName.equalsIgnoreCase("img1.jpg")){
+					coordinates = theConfig.getProperty("IMG1");
+					
+				} else if (imgName.equalsIgnoreCase("forest.jpg")) {
+					coordinates = theConfig.getProperty("FOREST");
+				
+				} else if (imgName.equalsIgnoreCase("river.jpg")) {
+					coordinates = theConfig.getProperty("RIVER");
+				
+				} else if (imgName.equalsIgnoreCase("river2.jpg")) {
+					coordinates = theConfig.getProperty("RIVER2");
+				}
+				
+				String [] intCoordnts = coordinates.split(",");
+				x1 = Integer.parseInt(intCoordnts[0]);
+				y1 = Integer.parseInt(intCoordnts[1]);
+				x2 = Integer.parseInt(intCoordnts[2]);
+				y2 = Integer.parseInt(intCoordnts[3]);
+				
+				spinnerX1.setValue(x1);
+				spinnerY1.setValue(y1);
+				spinnerX2.setValue(x2);
+				spinnerY2.setValue(y2);
+								
+				for (String str: intCoordnts){
+					System.out.println(str);
+				}
+				
+			}
         };
         
 
