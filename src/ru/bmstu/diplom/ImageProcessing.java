@@ -108,17 +108,17 @@ public  class ImageProcessing {
 	}
 	
 	/**
-	 * This method paint every pixel to red, 
-	 * if this pixel is entered to the range of the color avrg. values
 	 * 
 	 * @param blueAvrg
 	 * @param greenAvrg
 	 * @param redAvrg
+	 * @param error
+	 * @param toColor
 	 */
-	public void paintByAvrgs(int blueAvrg, int greenAvrg, int redAvrg, int error) {
-
+    private void paintPart(int blueAvrg, int greenAvrg, int redAvrg, int error, int toColor) {
+		
 		int blueColor, greenColor, redColor;
-				
+		
 		//Add the error(estimate) to the average values
 		int blueMin = blueAvrg - error;
 		int blueMax = blueAvrg + error;
@@ -137,12 +137,35 @@ public  class ImageProcessing {
         		if ( (blueColor < blueMax )  && (blueColor > blueMin)    &&
         			 (greenColor < greenMax) && (greenColor > greenMin)  &&
         			 (redColor < redMax)     && (redColor > redMin) ) {
-        				image.put(i, j, 2, 255);  // paint the pixel into the RED
+        				for (int k = 0; k < 3; k ++)
+        					image.put(i,j,k,10);
+        				image.put(i, j, toColor, 255);  // paint the pixel into the color
         				}
         		}
         	}
-        }
+	}
 
+	
+	/**
+	 * This method paint every pixel to red, 
+	 * if this pixel is entered to the range of the color avrg. values
+	 * 
+	 * @param blueAvrg
+	 * @param greenAvrg
+	 * @param redAvrg
+	 */
+	public void paintByAvrgs(int blueAvrg, int greenAvrg, int redAvrg, int error) {
+		paintPart(blueAvrg, greenAvrg, redAvrg, error, 2);
+		
+        }
+	
+	public void paintAll(int [][] colorMatrix, int error ) {
+		paintPart(colorMatrix[0][2], colorMatrix[0][1], colorMatrix[0][0], error, 0); // R 
+		paintPart(colorMatrix[1][2], colorMatrix[1][1], colorMatrix[1][0], error, 1); // G
+		paintPart(colorMatrix[2][2], colorMatrix[2][1], colorMatrix[2][0], error, 2); // B
+	}
+	
+	
 
 	/**
 	 * Print the matrix presentation of the image to the file 'out.txt'

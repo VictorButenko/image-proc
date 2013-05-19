@@ -16,8 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.swing.AbstractAction;
@@ -207,7 +207,30 @@ public final class GUI extends JFrame   {
             }
         };
         processAction.setEnabled(false);
+        
+        //Action perfomed when "Process ALL" button is pressed
+        final Action processAllAction = new AbstractAction("Process All") {
+			private static final long serialVersionUID = 1L;
 
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				try {
+					// Handle and renew a screen if an image is loaded
+					if (image != null) {
+						processAll(typeBox.getSelectedIndex(), image);
+						imageView.setIcon(new ImageIcon(image.getBufferedImage()));
+					} else {
+						showMessageDialog(GUI.this, "Image is not opened",
+                        		getTitle(), ERROR_MESSAGE);
+					}
+				} finally {
+					setCursor(Cursor.getDefaultCursor());
+				}
+			}
+		};
+		processAllAction.setEnabled(false);
+		
       //Action perfomed when "Fix" button is pressed
       		final Action fixAction  = new AbstractAction("Fix") {
       			private static final long serialVersionUID = 1L;
@@ -223,6 +246,8 @@ public final class GUI extends JFrame   {
       						countAverage(spinIndex, image); //Calculate averages values
       						
       						processAction.setEnabled(true); //Allow to use the button 'process'
+      						processAllAction.setEnabled(true);
+      						
       						showMessageDialog(GUI.this, 
       								"Coordinates of the " + typeBox.getSelectedItem() +" were fixed!", 
       								getTitle(), 
@@ -286,22 +311,42 @@ public final class GUI extends JFrame   {
 				} catch (IOException e) {
 					System.err.println("Couldn't load config file !!");
 				} 
+				
 				String coordinates = new String();
+				String averColors = new String();
 				System.out.println("imgName = " + imgName);
 				
+				boolean toInit = true;
 				if(imgName.equalsIgnoreCase("img1.jpg")){
 					coordinates = theConfig.getProperty("IMG1");
 					
 				} else if (imgName.equalsIgnoreCase("forest.jpg")) {
 					coordinates = theConfig.getProperty("FOREST");
-				
+					
+					averColors  = theConfig.getProperty("AV_FOREST");
+					initColors(averColors);
+					
 				} else if (imgName.equalsIgnoreCase("river.jpg")) {
 					coordinates = theConfig.getProperty("RIVER");
 				
 				} else if (imgName.equalsIgnoreCase("river2.jpg")) {
 					coordinates = theConfig.getProperty("RIVER2");
+					
+				} else if(imgName.equalsIgnoreCase("sky_forest.jpg")) {
+					coordinates = theConfig.getProperty("SKY_F");
+					averColors  = theConfig.getProperty("AV_SKY");
+					initColors(averColors);
+				
+				}  else if(imgName.equalsIgnoreCase("ximg.jpg")) {
+					coordinates = theConfig.getProperty("XIMG");
+					averColors  = theConfig.getProperty("AV_XIMG");
+					initColors(averColors);
+					
+				} else {
+					toInit = false;
 				}
 				
+				if (toInit) {
 				String [] intCoordnts = coordinates.split(",");
 				x1 = Integer.parseInt(intCoordnts[0]);
 				y1 = Integer.parseInt(intCoordnts[1]);
@@ -316,6 +361,29 @@ public final class GUI extends JFrame   {
 				for (String str: intCoordnts){
 					System.out.println(str);
 				}
+				
+				}
+			}
+
+			/**
+			 * Hardcode method for loading from the config file
+			 * @param averColors
+			 */
+			private void initColors(String averColors) {
+				String [] initColors = averColors.split(",");
+				int[][] loadColors  = new int [3][3];
+				
+				loadColors[0][0] = Integer.parseInt(initColors[0]);
+				loadColors[0][1] = Integer.parseInt(initColors[1]);
+				loadColors[0][2] = Integer.parseInt(initColors[2]);
+				loadColors[1][0] = Integer.parseInt(initColors[3]);
+				loadColors[1][1] = Integer.parseInt(initColors[4]);
+				loadColors[1][2] = Integer.parseInt(initColors[5]);
+				loadColors[2][0] = Integer.parseInt(initColors[6]);
+				loadColors[2][1] = Integer.parseInt(initColors[7]);
+				loadColors[2][2] = Integer.parseInt(initColors[8]);
+				
+				areaAverageColors = loadColors;
 				
 			}
         };
@@ -372,6 +440,7 @@ public final class GUI extends JFrame   {
         buttonsPanel.add(new JButton(fixAction));
         buttonsPanel.add(new JButton(allocateAction));
         buttonsPanel.add(new JButton(processAction));
+        buttonsPanel.add(new JButton(processAllAction));
         buttonsPanel.add(new JButton(resetAction));
         buttonsPanel.add(new JButton(saveAction));
         
@@ -515,6 +584,14 @@ public final class GUI extends JFrame   {
         int blueAvrg  = areaAverageColors[type][2];
         
         imgProc.paintByAvrgs(blueAvrg, greenAvrg, redAvrg, error);
+    }
+    
+    private void processAll(int type, final IplImage src) {
+    	ImageProcessing imgProc = new ImageProcessing(src);
+        error = (Integer) spinnerError.getValue();
+        
+        System.out.println(Arrays.deepToString(areaAverageColors));
+        imgProc.paintAll(areaAverageColors, error);
     }
 
 	/**Method for allocating the area 
