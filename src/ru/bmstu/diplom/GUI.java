@@ -332,12 +332,21 @@ public final class GUI extends JFrame   {
 				} else if (imgName.equalsIgnoreCase("river2.jpg")) {
 					coordinates = theConfig.getProperty("RIVER2");
 					
-				} else if(imgName.equalsIgnoreCase("sky_forest.jpg")) {
+				} else if (imgName.equalsIgnoreCase("river3.jpg")) {
+					coordinates = theConfig.getProperty("RIVER3");
+					
+				}  else if(imgName.equalsIgnoreCase("sky_forest.jpg")) {
 					coordinates = theConfig.getProperty("SKY_F");
 					averColors  = theConfig.getProperty("AV_SKY");
 					initColors(averColors);
 				
-				}  else if(imgName.equalsIgnoreCase("ximg.jpg")) {
+				}  else if(imgName.equalsIgnoreCase("wtf.jpg")) {
+					coordinates = theConfig.getProperty("WTF");
+				
+				}  else if(imgName.equalsIgnoreCase("blueSky.jpg")) {
+					coordinates = theConfig.getProperty("BLUESKY");
+				
+				} else if(imgName.equalsIgnoreCase("ximg.jpg")) {
 					coordinates = theConfig.getProperty("XIMG");
 					averColors  = theConfig.getProperty("AV_XIMG");
 					initColors(averColors);
